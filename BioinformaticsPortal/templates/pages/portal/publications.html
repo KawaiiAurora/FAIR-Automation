@@ -1,61 +1,49 @@
 {% extends 'layouts/base.html' %}
 {% load socialaccount %}
+{% load static %}
+{% load compress %}
 
 {% block content %}
 
-<style>
-table{
-	border-collapse:collapse;
-	border:1px solid black;
-}
-
-table td{
-	border:1px solid black;
-}
-
-#pTable{
-	width: 80%;
-	text-align: center;
-}
-
-#controls{
-	margin-bottom: 10px;
-}
-</style>
+<head>
+	{% compress css %}
+		<link rel="stylesheet" type="text/x-scss" href="{% static 'sass/publications.scss' %}">
+	{% endcompress %}
+</head>
 
 <div class="container">
+	<h3>Publications</h3>
 	<div id="controls">
     {% if user.is_authenticated %}
       <a class="nav-link" href="{% url 'add_publication' %}"><button>Add publication</button></a>
 		{% endif %}
 	</div>
-	<div class = "tablediv">
-		<table id="pTable">
-			<tr style="font-weight: bold">
-				<td>
-					Name
-				</td>
-				<td>
-					Author/s
-				</td>
-				<td>
-					Link
-				</td>
-			</tr>
-			{% for publication in publications %}
-			<tr>
-				<td>
-					{{publication.name}}
-				</td>
-				<td>
-					{{publication.authors}}
-				</td>
-				<td>
-					<a href="{{publication.link}}">{{publication.link}}</a>
-				</td>
-			</tr>
-			{% endfor %}
-		</table>
+	<table>
+		<tr>
+			<td>
+				Name
+			</td>
+			<td>
+				Author/s
+			</td>
+			<td>
+				Link
+			</td>
+		</tr>
+		{% for publication in publications %}
+		<tr>
+			<td>
+				{{publication.name}}
+			</td>
+			<td>
+				{{publication.authors}}
+			</td>
+			<td>
+				<a href="{{publication.link}}">{{publication.link}}</a>
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
 	</div>
 </div>
 {% endblock %}
