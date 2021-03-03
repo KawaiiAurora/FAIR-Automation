@@ -44,7 +44,10 @@
     <br/><br/>
     
     {% else %}
-    <h3 class="float-left">Tools</h3><a class="float-right mt-4" href="">Add tool</a><br/><br/>
+    <div class="d-flex flex-column">
+        <h3 class="float-left">Tools</h3>
+        <a class="align-self-end" href="">Add tool</a>
+    </div>
     {% endif %}
 
     <table>
@@ -97,7 +100,7 @@
 		</tr>
 		{% endfor %}
 	</table>
-    
+
     <br/>
 </div>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
