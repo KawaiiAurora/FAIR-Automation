@@ -12,12 +12,13 @@
 </head>
 
 <div class="container">
-	<h3>Publications</h3>
-	<div id="controls">
-    {% if user.is_authenticated %}
-      <a class="nav-link" href="{% url 'add_publication' %}"><button>Add publication</button></a>
+	<div class="d-flex flex-column">
+		<h3>Publications</h3>
+		{% if user.is_authenticated %}
+			<a class="align-self-end" href="{% url 'add_publication' %}">Add publication</a>
 		{% endif %}
 	</div>
+
 	<table>
 		<tr>
 			<td>
