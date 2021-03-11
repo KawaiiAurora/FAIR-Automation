@@ -19,32 +19,11 @@
 		{% endif %}
 	</div>
 
-	<table>
-		<tr>
-			<td>
-				Name
-			</td>
-			<td>
-				Author/s
-			</td>
-			<td>
-				Link
-			</td>
-		</tr>
-		{% for publication in publications %}
-		<tr>
-			<td>
-				{{publication.name}}
-			</td>
-			<td>
-				{{publication.authors}}
-			</td>
-			<td>
-				<a href="{{publication.link}}">{{publication.link}}</a>
-			</td>
-		</tr>
-		{% endfor %}
-	</table>
+	{% for publication in publications %}
+		<p>
+			{{publication|safe}}
+		</p>
+	{% endfor %}
 	</div>
 </div>
 {% endblock %}

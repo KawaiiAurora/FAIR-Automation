@@ -79,7 +79,7 @@ class PipelineTools(models.Model):
 
 
 class Publication(models.Model):
-    name = models.CharField(max_length=1000, blank=False, null=False)
+    title = models.CharField(max_length=1000, blank=False, null=False)
     url = models.CharField(max_length=2048, blank=True, null=True)
     journal = models.CharField(max_length=1000, null=True)
     conference = models.CharField(max_length=1000, null=True)
@@ -98,7 +98,8 @@ class PublicationAuthor(models.Model):
     email = models.EmailField(blank=True, null=True)
 
 
-class CorrespondingAuthor(models.Model):
+class PublicationAssociatedAuthor(models.Model):
     publicationId = models.ForeignKey(Publication, on_delete=models.CASCADE)
-    authorID = models.ForeignKey(PublicationAuthor, on_delete=models.CASCADE)
+    authorId = models.ForeignKey(PublicationAuthor, on_delete=models.CASCADE)
+    correspondingAuthor = models.BooleanField(default=False, blank=False, null=False)
 

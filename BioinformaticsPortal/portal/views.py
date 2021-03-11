@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from portal.models import FairScore, Tool, Findability, Accessibility, Interoperability, Reusability, Pipeline, PipelineTools, Publication
+from portal.models import FairScore, Tool, Findability, Accessibility, Interoperability, Reusability, Pipeline, \
+    PipelineTools, Publication
 from django.contrib.auth.decorators import login_required
 import yaml
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -9,57 +10,70 @@ from selenium import webdriver
 from crossref.restful import Works, Journals
 import requests
 
+
 def index(request):
     return render(request, 'portal/index.html', {
         'view_name': 'Home'
     })
 
+
 def publications(request):
-	context = {
-		'publications': Publication.objects.all()
-	}
-	return render(request, 'portal/publications.html', context)
+    def create_ieee_citation(publication):
+        if publication.journal is not None:
+            return f'Authors, "{publication.title}," <em>{publication.journal}</em>, {publication.year}.'
+        elif publication.conference is not None:
+            return f'Authors, "{publication.title}," presented at the {publication.conference}, {publication.year}'
+        else:
+            return f'Authors, "{publication.title},", {publication.year}.'
+
+    context = {
+        'publications': map(lambda pub: create_ieee_citation(pub), Publication.objects.all())
+    }
+    return render(request, 'portal/publications.html', context)
+
 
 def addPublication(request):
-	if request.POST:
-		publication_name=request.POST['name']
-		publication_author=request.POST['author']
-		publication_link=request.POST['link']
-		publication = Publication.objects.create(name=publication_name, authors=publication_author, link=publication_link)
-		#TODO: if combination of name, authors, link already exists, show error
-		#TODO: perhaps its better to use a forms class
-		#for error use something like this, or else simply say success and do not add object
-		#context={
-		# 'action': 'postform'
-		# 'result': 'error - publication already exists'
-		#}
+    if request.POST:
+        publication_name = request.POST['name']
+        publication_author = request.POST['author']
+        publication_link = request.POST['link']
+        publication = Publication.objects.create(name=publication_name, authors=publication_author,
+                                                 link=publication_link)
+        # TODO: if combination of name, authors, link already exists, show error
+        # TODO: perhaps its better to use a forms class
+        # for error use something like this, or else simply say success and do not add object
+        # context={
+        # 'action': 'postform'
+        # 'result': 'error - publication already exists'
+        # }
 
-		#return render(request, 'portal/publications.html', context)
-		return redirect('../publications/')
-	context = {
-		'action': 'fillform',
-		'publications': Publication.objects.all()
-	}
-	return render(request, 'portal/publications/add.html', context)
+        # return render(request, 'portal/publications.html', context)
+        return redirect('../publications/')
+    context = {
+        'action': 'fillform',
+        'publications': Publication.objects.all()
+    }
+    return render(request, 'portal/publications/add.html', context)
+
 
 def tools(request):
     if request.method == "POST":
         pipeline_id = list(request.POST.keys())[2]
         tool_id = request.POST['tool_id']
-        pipelineTool = PipelineTools.objects.create(pipeline_id = pipeline_id, tool_id = tool_id) 
+        pipelineTool = PipelineTools.objects.create(pipeline_id=pipeline_id, tool_id=tool_id)
 
-        pipeline_tools = PipelineTools.objects.select_related('tool').filter(pipeline_id = pipeline_id)
+        pipeline_tools = PipelineTools.objects.select_related('tool').filter(pipeline_id=pipeline_id)
         f = 0
         a = 0
         i = 0
         r = 0
         for tool in pipeline_tools:
-            fairscore = FairScore.objects.get(tool_id = tool.tool_id)
+            fairscore = FairScore.objects.get(tool_id=tool.tool_id)
             f = f + fairscore.findability
             a = a + fairscore.accessibility
             i = i + fairscore.interoperability
             r = r + fairscore.reusability
-        
+
         f = round(f / len(pipeline_tools), 2)
         a = round(a / len(pipeline_tools), 2)
         i = round(i / len(pipeline_tools), 2)
@@ -72,7 +86,7 @@ def tools(request):
         pipeline.save()
 
     tools = FairScore.objects.select_related('tool').filter(tool__isPrivate=False)
-    
+
     if request.user.is_authenticated:
         private = Tool.objects.filter(isPrivate=True, owner_id=request.user.id).all()
         context = {
@@ -88,8 +102,8 @@ def tools(request):
 
     return render(request, 'portal/tools.html', context)
 
-def details(request, id):
 
+def details(request, id):
     if request.POST:
         print(request.POST)
         if request.POST['scope'] == 'findability':
@@ -180,7 +194,7 @@ def details(request, id):
                 score = score + float(request.POST['sc'])
             else:
                 score = score + upInt.sourceCode
-            updateFair.interoperability = round(((compScore * (5/3)) * 10), 2) + (score*10)
+            updateFair.interoperability = round(((compScore * (5 / 3)) * 10), 2) + (score * 10)
             updateFair.save()
             upInt.save()
 
@@ -287,14 +301,11 @@ def details(request, id):
                         upRe.citation = request.POST['citation']
                         score = score + float(request.POST['citation'])
                 else:
-                    score = score + upRe.citation 
+                    score = score + upRe.citation
 
             updateFair.reusability = score * 5
             updateFair.save()
-            upRe.save() 
-
-
-            
+            upRe.save()
 
     tool = Tool.objects.get(id=id)
     findability = Findability.objects.get(tool_id=id)
@@ -302,7 +313,7 @@ def details(request, id):
     interoperability = Interoperability.objects.get(tool_id=id)
     reusability = Reusability.objects.get(tool_id=id)
     fair = FairScore.objects.get(tool_id=id)
-    
+
     context = {
         'view_name': 'Details',
         'tool': tool,
@@ -314,8 +325,9 @@ def details(request, id):
     }
     return render(request, 'portal/tools/details.html', context)
 
+
 def add(request, id):
-    pipelines = Pipeline.objects.filter(owner_id = request.user.id)
+    pipelines = Pipeline.objects.filter(owner_id=request.user.id)
     tool = Tool.objects.get(id=id)
 
     context = {
@@ -325,26 +337,26 @@ def add(request, id):
     }
     return render(request, 'portal/tools/add.html', context)
 
+
 @login_required(login_url='/accounts/login/')
 def pipelines(request):
-    
     if request.POST:
         tool_id = list(request.POST.keys())[2]
         pipeline_id = request.POST['pipeline_id']
-        pipelineTool = PipelineTools.objects.get(pipeline_id=pipeline_id, tool_id=tool_id).delete() 
+        pipelineTool = PipelineTools.objects.get(pipeline_id=pipeline_id, tool_id=tool_id).delete()
 
-        pipeline_tools = PipelineTools.objects.select_related('tool').filter(pipeline_id = pipeline_id)
+        pipeline_tools = PipelineTools.objects.select_related('tool').filter(pipeline_id=pipeline_id)
         f = 0
         a = 0
         i = 0
         r = 0
         for tool in pipeline_tools:
-            fairscore = FairScore.objects.get(tool_id = tool.tool_id)
+            fairscore = FairScore.objects.get(tool_id=tool.tool_id)
             f = f + fairscore.findability
             a = a + fairscore.accessibility
             i = i + fairscore.interoperability
             r = r + fairscore.reusability
-        
+
         f = round(f / len(pipeline_tools), 2)
         a = round(a / len(pipeline_tools), 2)
         i = round(i / len(pipeline_tools), 2)
@@ -356,24 +368,25 @@ def pipelines(request):
         pipeline.reusability = r
         pipeline.save()
 
-    pipelines = Pipeline.objects.filter(owner_id = request.user.id)
+    pipelines = Pipeline.objects.filter(owner_id=request.user.id)
     context = {
         'view_name': 'Pipelines',
         'pipelines': pipelines
     }
     return render(request, 'portal/pipelines.html', context)
 
+
 @login_required(login_url='/accounts/login/')
 def pipelineDetails(request, id):
     pipeline = Pipeline.objects.get(id=id)
-    tools = PipelineTools.objects.select_related('tool', 'pipeline').filter(pipeline_id = id).order_by('position')
+    tools = PipelineTools.objects.select_related('tool', 'pipeline').filter(pipeline_id=id).order_by('position')
     toolScores = []
     for tool in tools:
         t = FairScore.objects.select_related('tool').get(tool_id=tool.tool_id)
         toolScores.append(t)
     if request.user.id is not pipeline.owner_id:
         return redirect('pipelines')
-    
+
     context = {
         'view_name': 'Pipeline Details',
         'tools': tools,
@@ -382,17 +395,19 @@ def pipelineDetails(request, id):
     }
     return render(request, 'portal/pipelines/details.html', context)
 
+
 def createPipeline(request):
     if request.POST:
-        pipeline_name=request.POST['name']
+        pipeline_name = request.POST['name']
         pipeline = Pipeline.objects.create(name=pipeline_name, owner_id=request.user.id)
 
-        context={
+        context = {
             'view_name': 'success',
             'name': pipeline_name
         }
         return render(request, 'portal/pipelines/success.html', context)
     return render(request, 'portal/pipelines/create.html')
+
 
 @login_required(login_url='/accounts/login/')
 def privateDetails(request, id):
@@ -400,11 +415,12 @@ def privateDetails(request, id):
     if request.user.id is not tool.owner_id:
         return redirect('tools')
     else:
-        context={
+        context = {
             'view_name': 'Private Tool details',
             'tool': tool
         }
         return render(request, 'portal/tools/private.html', context)
+
 
 def refineFindability(request, id):
     tool = FairScore.objects.select_related('tool').get(tool_id=id)
@@ -416,6 +432,7 @@ def refineFindability(request, id):
     }
     return render(request, 'portal/refine/findability.html', context)
 
+
 def refineAccessibility(request, id):
     tool = FairScore.objects.select_related('tool').get(tool_id=id)
     accessibility = Accessibility.objects.get(tool_id=id)
@@ -425,6 +442,7 @@ def refineAccessibility(request, id):
         'accessibility': accessibility
     }
     return render(request, 'portal/refine/accessibility.html', context)
+
 
 def refineInteroperability(request, id):
     tool = FairScore.objects.select_related('tool').get(tool_id=id)
@@ -436,6 +454,7 @@ def refineInteroperability(request, id):
     }
     return render(request, 'portal/refine/interoperability.html', context)
 
+
 def refineReusability(request, id):
     tool = FairScore.objects.select_related('tool').get(tool_id=id)
     reusability = Reusability.objects.get(tool_id=id)
@@ -446,11 +465,12 @@ def refineReusability(request, id):
     }
     return render(request, 'portal/refine/reusability.html', context)
 
+
 def addTool(request):
     if request.POST:
         print(request.POST)
         if request.POST['website']:
-            tool=""
+            tool = ""
             try:
                 tool = Tool.objects.get(tool_name=request.POST['name'])
             except ObjectDoesNotExist:
@@ -458,7 +478,9 @@ def addTool(request):
             if not tool:
                 active_ontologies = []
                 # with open("C:/Users/Nigel/Desktop/FAIR-Automation/BioinformaticsPortal/portal/static/data/ontologies.yml", 'r') as ont:
-                with open("/media/jbon4/Data/Development/python/Bioinformatics Portal/FAIR-Automation/BioinformaticsPortal/static/data/ontologies.yml", 'r') as ont:
+                with open(
+                        "/media/jbon4/Data/Development/python/Bioinformatics Portal/FAIR-Automation/BioinformaticsPortal/static/data/ontologies.yml",
+                        'r') as ont:
                     try:
                         content = yaml.load(ont)
                         for item in content.items():
@@ -472,19 +494,25 @@ def addTool(request):
                 my_cse_id = "010537144392431308903:g2eqgue84js"
                 search_phrase = request.POST['name']
                 driver = webdriver.Firefox()
+
                 def google_search(search_term, api_key, cse_id, **kwargs):
                     service = build("customsearch", "v1", developerKey=api_key)
                     res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
                     return res['items']
+
                 def findPage(results, search_phrase):
-                    phrases = ["protein", "dna", "bioinformatics", "genome", "nucleotide", "biological", "biotechnology", "alignment", "amino acid", "autoradiography", "autosomal", "blotting", "blots", "cell", "computational biology", "sequencing", "similarity", "cluster", "cytoplasm", "enzyme", "gene", "genomics", "immunoglobuline", "lead", "mitosis"]
+                    phrases = ["protein", "dna", "bioinformatics", "genome", "nucleotide", "biological",
+                               "biotechnology", "alignment", "amino acid", "autoradiography", "autosomal", "blotting",
+                               "blots", "cell", "computational biology", "sequencing", "similarity", "cluster",
+                               "cytoplasm", "enzyme", "gene", "genomics", "immunoglobuline", "lead", "mitosis"]
                     for result in results:
                         if search_phrase in result["title"].lower():
                             driver.get(result["link"])
                             for phrase in phrases:
                                 if phrase in driver.page_source.lower():
-                                    link=result["link"]
+                                    link = result["link"]
                                     return link
+
                 link = request.POST['website']
                 download = ""
                 publicRepo = ""
@@ -498,18 +526,18 @@ def addTool(request):
                 contact = ""
                 apiInfo = ""
                 doi = ""
-                doiTitle=""
-                ontology=""
-                ontologies=""
+                doiTitle = ""
+                ontology = ""
+                ontologies = ""
                 source = ""
                 cli = ""
-                git= ""
+                git = ""
                 if link:
                     driver.get(link)
                     try:
                         elem = driver.find_element_by_partial_link_text("Download")
                         download = elem.get_attribute('innerHTML')
-                        elem.click()  
+                        elem.click()
                     except Exception:
                         pass
                     if "github.com" in driver.current_url:
@@ -534,15 +562,15 @@ def addTool(request):
                             # print("public resource available")
                             publicRepo = git
                             documentation = "available"
-                            download=git
+                            download = git
                             versElem = "available"
                             source = "available"
                     if not versElem:
-                        try:    
+                        try:
                             versElem = driver.find_element_by_xpath("//*[contains(text(), 'Older versions')]")
                         except Exception:
                             pass
-                            
+
                         if not versElem:
                             try:
                                 versElem = driver.find_element_by_xpath("//*[contains(text(), 'Previous versions')]")
@@ -568,7 +596,7 @@ def addTool(request):
                             source = driver.find_element_by_xpath("//*[contains(text(), 'Source code')]")
                         except Exception:
                             pass
-                    
+
                     if not source:
                         try:
                             source = driver.find_element_by_xpath("//*[contains(text(), 'Source Code')]")
@@ -602,14 +630,14 @@ def addTool(request):
                         unixComp = driver.find_element_by_xpath("//*[contains(text(), 'UNIX')]")
                     except Exception:
                         pass
-                    
+
                     if not unixComp:
                         try:
                             driver.find_element_by_xpath("//*[contains(text(), 'Unix')]")
                         except Exception:
                             pass
 
-                    try:        
+                    try:
                         macComp = driver.find_element_by_xpath("//*[contains(text(), 'Mac')]")
                     except Exception:
                         pass
@@ -638,15 +666,15 @@ def addTool(request):
                                 # print("public resource available")
                                 publicRepo = git
                                 documentation = "available"
-                                download=git
+                                download = git
                                 versElem = "available"
                                 source = "available"
                     if not versElem:
-                        try:    
+                        try:
                             versElem = driver.find_element_by_xpath("//*[contains(text(), 'Older versions')]")
                         except Exception:
                             pass
-                            
+
                         if not versElem:
                             try:
                                 versElem = driver.find_element_by_xpath("//*[contains(text(), 'Previous versions')]")
@@ -706,9 +734,9 @@ def addTool(request):
                         try:
                             driver.find_element_by_xpath("//*[contains(text(), 'Unix')]")
                         except Exception:
-                            pass 
+                            pass
                     if not macComp:
-                        try:        
+                        try:
                             macComp = driver.find_element_by_xpath("//*[contains(text(), 'Mac')]")
                         except Exception:
                             pass
@@ -716,7 +744,7 @@ def addTool(request):
                         about = driver.find_element_by_partial_link_text("About")
                     except Exception:
                         pass
-                    
+
                     if not about:
                         try:
                             about = driver.find_element_by_xpath("//*[contains(text(), 'Introduction')]")
@@ -734,7 +762,7 @@ def addTool(request):
                                     about = driver.find_element_by_xpath("//*[contains(text(), 'Description')]")
                                 except Exception:
                                     pass
-                                
+
                                 if not about:
                                     try:
                                         about = driver.find_element_by_xpath("//*[contains(text(), 'desc')]")
@@ -773,7 +801,7 @@ def addTool(request):
                             contact = driver.find_element_by_xpath("//*[contains(text(), 'contact')]")
                         except Exception:
                             pass
-                    try:            
+                    try:
                         apiInfo = driver.find_element_by_partial_link_text("API")
                     except Exception:
                         pass
@@ -785,7 +813,7 @@ def addTool(request):
                     try:
                         for ont in active_ontologies:
                             if ont in driver.page_source.lower():
-                                ontology="available"
+                                ontology = "available"
                                 ontologies = ontologies + ont
                     except Exception:
                         pass
@@ -807,11 +835,11 @@ def addTool(request):
                             pass
                 if not doi:
                     works = Works()
-                    i=0
+                    i = 0
                     if doiTitle:
                         w1 = works.query(title=doiTitle).filter(type="journal-article").sort('relevance')
                         for item in w1:
-                            i=i+1
+                            i = i + 1
                             if item['title'] is doiTitle:
                                 doi = item['DOI']
                                 break
@@ -820,7 +848,7 @@ def addTool(request):
                     else:
                         w1 = works.query(title=search_phrase).filter(type="journal-article").sort("relevance")
                         for item in w1:
-                            i=i+1
+                            i = i + 1
                             if search_phrase in item['title']:
                                 doi = item['DOI']
                                 break
@@ -844,26 +872,26 @@ def addTool(request):
                     versVal = 0.0
                 compVal = 0.0
                 if not windowsComp and not unixComp and not macComp:
-                    compVal=0.0
-                    winComp=0
-                    unixComp=0
-                    macComp=0
+                    compVal = 0.0
+                    winComp = 0
+                    unixComp = 0
+                    macComp = 0
                 else:
                     if windowsComp:
-                        compVal = compVal + (5/3)
-                        winComp=1.0
+                        compVal = compVal + (5 / 3)
+                        winComp = 1.0
                     else:
                         winComp = 0.0
                     if unixComp:
-                        compVal = compVal + (5/3)
-                        unixComp=1.0
+                        compVal = compVal + (5 / 3)
+                        unixComp = 1.0
                     else:
-                        unixComp=0.0
+                        unixComp = 0.0
                     if macComp:
-                        compVal = compVal + (5/3)
-                        macComp=1.0
+                        compVal = compVal + (5 / 3)
+                        macComp = 1.0
                     else:
-                        macComp=0.0
+                        macComp = 0.0
                 if about:
                     aboutVal = 5.0
                 else:
@@ -895,23 +923,31 @@ def addTool(request):
                 if cli:
                     cliVal = 5.0
                 else:
-                    cliVal=0.0
-                findability = ((downloadVal + doiVal + aboutVal + versVal) / (8+5+5+2)) * 100
+                    cliVal = 0.0
+                findability = ((downloadVal + doiVal + aboutVal + versVal) / (8 + 5 + 5 + 2)) * 100
                 findability = round(findability, 2)
-                accessiblity = ((apiVal+cliVal)/(5+5))*100
+                accessiblity = ((apiVal + cliVal) / (5 + 5)) * 100
                 accessiblity = round(accessiblity, 2)
-                interoperability = ((compVal+sourceVal)/(5+5)) * 100
+                interoperability = ((compVal + sourceVal) / (5 + 5)) * 100
                 interoperability = round(interoperability, 2)
-                reusability = ((publicRepoVal + ontologyVal + documentationVal + contactVal + citeVal) / (8+4+4+2+2)) * 100
+                reusability = ((publicRepoVal + ontologyVal + documentationVal + contactVal + citeVal) / (
+                        8 + 4 + 4 + 2 + 2)) * 100
                 tool = Tool.objects.create(tool_name=request.POST['name'], isPrivate=0)
-                tool = Tool.objects.get(tool_name = request.POST['name'])
-                fairScore = FairScore.objects.create(findability = findability, accessibility = accessiblity, interoperability = interoperability, reusability = reusability, tool_id = tool.id)
-                find = Findability.objects.create(free_down=downloadVal, doi = doiVal, description = aboutVal, versions = versVal, tool_id=tool.id, doiLink=doi, downlink=download)
-                acc = Accessibility.objects.create(api=apiVal, tool_id = tool.id, commandLine=cliVal)
-                interop = Interoperability.objects.create(compatibility = compVal, tool_id=tool.id, macComp=macComp, unixComp=unixComp, winComp=winComp, sourceCode=sourceVal)
-                reuse= Reusability.objects.create(public_repo=publicRepoVal, ontology=ontologyVal, documentation=documentationVal, contact=contactVal, citation=citeVal, tool_id=tool.id, repositoryLink=publicRepo, ontUsed=ontologies, usesOnt=1) 
+                tool = Tool.objects.get(tool_name=request.POST['name'])
+                fairScore = FairScore.objects.create(findability=findability, accessibility=accessiblity,
+                                                     interoperability=interoperability, reusability=reusability,
+                                                     tool_id=tool.id)
+                find = Findability.objects.create(free_down=downloadVal, doi=doiVal, description=aboutVal,
+                                                  versions=versVal, tool_id=tool.id, doiLink=doi, downlink=download)
+                acc = Accessibility.objects.create(api=apiVal, tool_id=tool.id, commandLine=cliVal)
+                interop = Interoperability.objects.create(compatibility=compVal, tool_id=tool.id, macComp=macComp,
+                                                          unixComp=unixComp, winComp=winComp, sourceCode=sourceVal)
+                reuse = Reusability.objects.create(public_repo=publicRepoVal, ontology=ontologyVal,
+                                                   documentation=documentationVal, contact=contactVal, citation=citeVal,
+                                                   tool_id=tool.id, repositoryLink=publicRepo, ontUsed=ontologies,
+                                                   usesOnt=1)
         else:
-            tool=""
+            tool = ""
             try:
                 tool = Tool.objects.get(tool_name=request.POST['name'])
             except ObjectDoesNotExist:
@@ -919,7 +955,9 @@ def addTool(request):
             if not tool:
                 active_ontologies = []
                 # with open("C:/Users/Nigel/Desktop/FAIR-Automation/BioinformaticsPortal/portal/static/data/ontologies.yml", 'r') as ont:
-                with open("/media/jbon4/Data/Development/python/Bioinformatics Portal/FAIR-Automation/BioinformaticsPortal/static/data/ontologies.yml", 'r') as ont:
+                with open(
+                        "/media/jbon4/Data/Development/python/Bioinformatics Portal/FAIR-Automation/BioinformaticsPortal/static/data/ontologies.yml",
+                        'r') as ont:
                     try:
                         content = yaml.load(ont)
                         for item in content.items():
@@ -933,20 +971,26 @@ def addTool(request):
                 my_cse_id = "010537144392431308903:g2eqgue84js"
                 search_phrase = request.POST['name']
                 driver = webdriver.Firefox()
+
                 def google_search(search_term, api_key, cse_id, **kwargs):
                     service = build("customsearch", "v1", developerKey=api_key)
                     res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
                     return res['items']
+
                 def findPage(results, search_phrase):
-                    phrases = ["protein", "dna", "bioinformatics", "genome", "nucleotide", "biological", "biotechnology", "alignment", "amino acid", "autoradiography", "autosomal", "blotting", "blots", "cell", "computational biology", "sequencing", "similarity", "cluster", "cytoplasm", "enzyme", "gene", "genomics", "immunoglobuline", "lead", "mitosis"]
+                    phrases = ["protein", "dna", "bioinformatics", "genome", "nucleotide", "biological",
+                               "biotechnology", "alignment", "amino acid", "autoradiography", "autosomal", "blotting",
+                               "blots", "cell", "computational biology", "sequencing", "similarity", "cluster",
+                               "cytoplasm", "enzyme", "gene", "genomics", "immunoglobuline", "lead", "mitosis"]
                     for result in results:
                         if search_phrase in result["title"].lower():
                             driver.get(result["link"])
                             for phrase in phrases:
                                 if phrase in driver.page_source.lower():
-                                    link=result["link"]
+                                    link = result["link"]
                                     return link
-                results = google_search(search_phrase ,my_api_key, my_cse_id, num=20)
+
+                results = google_search(search_phrase, my_api_key, my_cse_id, num=20)
                 link = findPage(results, search_phrase)
                 download = ""
                 publicRepo = ""
@@ -960,18 +1004,18 @@ def addTool(request):
                 contact = ""
                 apiInfo = ""
                 doi = ""
-                doiTitle=""
-                ontology=""
-                ontologies=""
+                doiTitle = ""
+                ontology = ""
+                ontologies = ""
                 source = ""
                 cli = ""
-                git= ""
+                git = ""
                 if link:
                     driver.get(link)
                     try:
                         elem = driver.find_element_by_partial_link_text("Download")
                         download = elem.get_attribute('innerHTML')
-                        elem.click()  
+                        elem.click()
                     except Exception:
                         pass
                     if "github.com" in driver.current_url:
@@ -996,15 +1040,15 @@ def addTool(request):
                             # print("public resource available")
                             publicRepo = git
                             documentation = "available"
-                            download=git
+                            download = git
                             versElem = "available"
                             source = "available"
                     if not versElem:
-                        try:    
+                        try:
                             versElem = driver.find_element_by_xpath("//*[contains(text(), 'Older versions')]")
                         except Exception:
                             pass
-                            
+
                         if not versElem:
                             try:
                                 versElem = driver.find_element_by_xpath("//*[contains(text(), 'Previous versions')]")
@@ -1030,7 +1074,7 @@ def addTool(request):
                             source = driver.find_element_by_xpath("//*[contains(text(), 'Source code')]")
                         except Exception:
                             pass
-                    
+
                     if not source:
                         try:
                             source = driver.find_element_by_xpath("//*[contains(text(), 'Source Code')]")
@@ -1064,14 +1108,14 @@ def addTool(request):
                         unixComp = driver.find_element_by_xpath("//*[contains(text(), 'UNIX')]")
                     except Exception:
                         pass
-                    
+
                     if not unixComp:
                         try:
                             driver.find_element_by_xpath("//*[contains(text(), 'Unix')]")
                         except Exception:
                             pass
 
-                    try:        
+                    try:
                         macComp = driver.find_element_by_xpath("//*[contains(text(), 'Mac')]")
                     except Exception:
                         pass
@@ -1100,15 +1144,15 @@ def addTool(request):
                                 # print("public resource available")
                                 publicRepo = git
                                 documentation = "available"
-                                download=git
+                                download = git
                                 versElem = "available"
                                 source = "available"
                     if not versElem:
-                        try:    
+                        try:
                             versElem = driver.find_element_by_xpath("//*[contains(text(), 'Older versions')]")
                         except Exception:
                             pass
-                            
+
                         if not versElem:
                             try:
                                 versElem = driver.find_element_by_xpath("//*[contains(text(), 'Previous versions')]")
@@ -1168,9 +1212,9 @@ def addTool(request):
                         try:
                             driver.find_element_by_xpath("//*[contains(text(), 'Unix')]")
                         except Exception:
-                            pass 
+                            pass
                     if not macComp:
-                        try:        
+                        try:
                             macComp = driver.find_element_by_xpath("//*[contains(text(), 'Mac')]")
                         except Exception:
                             pass
@@ -1178,7 +1222,7 @@ def addTool(request):
                         about = driver.find_element_by_partial_link_text("About")
                     except Exception:
                         pass
-                    
+
                     if not about:
                         try:
                             about = driver.find_element_by_xpath("//*[contains(text(), 'Introduction')]")
@@ -1196,7 +1240,7 @@ def addTool(request):
                                     about = driver.find_element_by_xpath("//*[contains(text(), 'Description')]")
                                 except Exception:
                                     pass
-                                
+
                                 if not about:
                                     try:
                                         about = driver.find_element_by_xpath("//*[contains(text(), 'desc')]")
@@ -1235,7 +1279,7 @@ def addTool(request):
                             contact = driver.find_element_by_xpath("//*[contains(text(), 'contact')]")
                         except Exception:
                             pass
-                    try:            
+                    try:
                         apiInfo = driver.find_element_by_partial_link_text("API")
                     except Exception:
                         pass
@@ -1247,7 +1291,7 @@ def addTool(request):
                     try:
                         for ont in active_ontologies:
                             if ont in driver.page_source.lower():
-                                ontology="available"
+                                ontology = "available"
                                 ontologies = ontologies + ont
                     except Exception:
                         pass
@@ -1269,11 +1313,11 @@ def addTool(request):
                             pass
                 if not doi:
                     works = Works()
-                    i=0
+                    i = 0
                     if doiTitle:
                         w1 = works.query(title=doiTitle).filter(type="journal-article").sort('relevance')
                         for item in w1:
-                            i=i+1
+                            i = i + 1
                             if item['title'] is doiTitle:
                                 doi = item['DOI']
                                 break
@@ -1282,7 +1326,7 @@ def addTool(request):
                     else:
                         w1 = works.query(title=search_phrase).filter(type="journal-article").sort("relevance")
                         for item in w1:
-                            i=i+1
+                            i = i + 1
                             if search_phrase in item['title']:
                                 doi = item['DOI']
                                 break
@@ -1306,26 +1350,26 @@ def addTool(request):
                     versVal = 0.0
                 compVal = 0.0
                 if not windowsComp and not unixComp and not macComp:
-                    compVal=0.0
-                    winComp=0
-                    unixComp=0
-                    macComp=0
+                    compVal = 0.0
+                    winComp = 0
+                    unixComp = 0
+                    macComp = 0
                 else:
                     if windowsComp:
-                        compVal = compVal + (5/3)
-                        winComp=1.0
+                        compVal = compVal + (5 / 3)
+                        winComp = 1.0
                     else:
                         winComp = 0.0
                     if unixComp:
-                        compVal = compVal + (5/3)
-                        unixComp=1.0
+                        compVal = compVal + (5 / 3)
+                        unixComp = 1.0
                     else:
-                        unixComp=0.0
+                        unixComp = 0.0
                     if macComp:
-                        compVal = compVal + (5/3)
-                        macComp=1.0
+                        compVal = compVal + (5 / 3)
+                        macComp = 1.0
                     else:
-                        macComp=0.0
+                        macComp = 0.0
                 if about:
                     aboutVal = 5.0
                 else:
@@ -1357,21 +1401,29 @@ def addTool(request):
                 if cli:
                     cliVal = 5.0
                 else:
-                    cliVal=0.0
-                findability = ((downloadVal + doiVal + aboutVal + versVal) / (8+5+5+2)) * 100
+                    cliVal = 0.0
+                findability = ((downloadVal + doiVal + aboutVal + versVal) / (8 + 5 + 5 + 2)) * 100
                 findability = round(findability, 2)
-                accessiblity = ((apiVal+cliVal)/(5+5))*100
+                accessiblity = ((apiVal + cliVal) / (5 + 5)) * 100
                 accessiblity = round(accessiblity, 2)
-                interoperability = ((compVal+sourceVal)/(5+5)) * 100
+                interoperability = ((compVal + sourceVal) / (5 + 5)) * 100
                 interoperability = round(interoperability, 2)
-                reusability = ((publicRepoVal + ontologyVal + documentationVal + contactVal + citeVal) / (8+4+4+2+2)) * 100
+                reusability = ((publicRepoVal + ontologyVal + documentationVal + contactVal + citeVal) / (
+                        8 + 4 + 4 + 2 + 2)) * 100
                 tool = Tool.objects.create(tool_name=request.POST['name'], isPrivate=0)
-                tool = Tool.objects.get(tool_name = request.POST['name'])
-                fairScore = FairScore.objects.create(findability = findability, accessibility = accessiblity, interoperability = interoperability, reusability = reusability, tool_id = tool.id)
-                find = Findability.objects.create(free_down=downloadVal, doi = doiVal, description = aboutVal, versions = versVal, tool_id=tool.id, doiLink=doi, downlink=download)
-                acc = Accessibility.objects.create(api=apiVal, tool_id = tool.id, commandLine=cliVal)
-                interop = Interoperability.objects.create(compatibility = compVal, tool_id=tool.id, macComp=macComp, unixComp=unixComp, winComp=winComp, sourceCode=sourceVal)
-                reuse= Reusability.objects.create(public_repo=publicRepoVal, ontology=ontologyVal, documentation=documentationVal, contact=contactVal, citation=citeVal, tool_id=tool.id, repositoryLink=publicRepo, ontUsed=ontologies, usesOnt=1) 
-       
+                tool = Tool.objects.get(tool_name=request.POST['name'])
+                fairScore = FairScore.objects.create(findability=findability, accessibility=accessiblity,
+                                                     interoperability=interoperability, reusability=reusability,
+                                                     tool_id=tool.id)
+                find = Findability.objects.create(free_down=downloadVal, doi=doiVal, description=aboutVal,
+                                                  versions=versVal, tool_id=tool.id, doiLink=doi, downlink=download)
+                acc = Accessibility.objects.create(api=apiVal, tool_id=tool.id, commandLine=cliVal)
+                interop = Interoperability.objects.create(compatibility=compVal, tool_id=tool.id, macComp=macComp,
+                                                          unixComp=unixComp, winComp=winComp, sourceCode=sourceVal)
+                reuse = Reusability.objects.create(public_repo=publicRepoVal, ontology=ontologyVal,
+                                                   documentation=documentationVal, contact=contactVal, citation=citeVal,
+                                                   tool_id=tool.id, repositoryLink=publicRepo, ontUsed=ontologies,
+                                                   usesOnt=1)
+
         return redirect('details', id=tool.id)
     return render(request, 'portal/add.html')
