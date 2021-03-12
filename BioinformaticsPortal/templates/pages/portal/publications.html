@@ -66,16 +66,16 @@
                     <a class="page-link" href="{% url 'publications' current_page|add:"-1" %}?pubs_per_page={{ pubs_per_page }}">Previous</a>
                 </li>
             {% endif %}
-            {% for pageNo in total_pages %}
-                <li class="page-item {% if current_page == forloop.counter %} active {% endif %}">
-                    <a class="page-link" href="{% url 'publications' forloop.counter %}?pubs_per_page={{ pubs_per_page }}">{{forloop.counter}}</a>
+            {% for pageNo in shown_pages %}
+                <li class="page-item {% if current_page == pageNo %} active {% endif %}">
+                    <a class="page-link" href="{% url 'publications' pageNo %}?pubs_per_page={{ pubs_per_page }}">{{pageNo}}</a>
                 </li>
             {% endfor %}
             {% if current_page < total_pages|last %}
                 <li class="page-item"><a class="page-link" href="{% url 'publications' current_page|add:"1" %}?pubs_per_page={{ pubs_per_page }}">Next</a></li>
             {% endif %}
             <p class="pagination_text ml-2 mb-0 p-0 d-inline">Publications per page: </p>
-            <select onchange="updatePagination('{% url 'publications' page=current_page %}',this)" class="ml-2 custom-select" style="width:auto">
+            <select onchange="updatePagination('{% url 'publications' current_page %}',this)" class="ml-2 custom-select" style="width:auto">
               <option {% if pubs_per_page == 10 %} selected {% endif %} value="10">10</option>
               <option {% if pubs_per_page == 20 %} selected {% endif %} value="20">20</option>
               <option {% if pubs_per_page == 50 %} selected {% endif %} value="50">50</option>

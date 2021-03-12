@@ -18,7 +18,7 @@ def index(request):
     })
 
 
-def publications(request, page):
+def publications(request, current_page):
     def create_ieee_citation(publication):
         authors = list(publication.authors.all())
         author_string = ""
@@ -42,22 +42,31 @@ def publications(request, page):
 
         return authors
 
+    def det_shown_page_range(full_page_range, pages_to_view):
+        pages_ahead = len(full_page_range) - (pages_to_view - 1)
+        if current_page < pages_ahead:
+            return full_page_range[current_page - 1:current_page + (pages_to_view-1)]
+        else:
+            start_page = len(full_page_range) - pages_to_view
+            return full_page_range[start_page:]
+
     all_pubs = list(map(lambda pub:
-                   {
-                       "citation": create_ieee_citation(pub),
-                       "pub": pub,
-                       "authors": full_authors(pub),
-                   }, Publication.objects.all()))
+                        {
+                            "citation": create_ieee_citation(pub),
+                            "pub": pub,
+                            "authors": full_authors(pub),
+                        }, Publication.objects.all()))
     paginator = Paginator(all_pubs, request.GET.get('pubs_per_page') or 10)
 
-    if page not in range(1, paginator.num_pages+1):
-        page = 1
+    if current_page not in paginator.page_range:
+        current_page = 1
 
-    page_obj = paginator.get_page(page)
+    page_obj = paginator.get_page(current_page)
 
     return render(request, 'portal/publications.html', {'publications': page_obj,
                                                         'total_pages': paginator.page_range,
-                                                        'current_page': page,
+                                                        'shown_pages': det_shown_page_range(paginator.page_range, 5),
+                                                        'current_page': current_page,
                                                         'pubs_per_page': paginator.per_page})
 
 
