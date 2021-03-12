@@ -23,7 +23,7 @@
 		{% endif %}
 	</div>
 
-    <div class="mt-4">
+    <div class="mt-4 mb-4">
         {% for publication in publications %}
             <div class="mt-4">
                 <p class="m-0 p-0">
@@ -58,6 +58,20 @@
             </div>
         {% endfor %}
     </div>
+
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        {% if current_page > 1 %}
+            <li class="page-item"><a class="page-link" href="{% url 'publications' page=current_page|add:"-1" %}">Previous</a></li>
+        {% endif %}
+        {% for pageNo in total_pages %}
+            <li class="page-item {% if current_page == forloop.counter %} active {% endif %}"><a class="page-link" href="{% url 'publications' page=forloop.counter %}">{{forloop.counter}}</a></li>
+        {% endfor %}
+        {% if current_page < total_pages|last %}
+            <li class="page-item"><a class="page-link" href="{% url 'publications' page=current_page|add:"1" %}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
 
 	</div>
 </div>

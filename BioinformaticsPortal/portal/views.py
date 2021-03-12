@@ -18,7 +18,7 @@ def index(request):
     })
 
 
-def publications(request):
+def publications(request, page):
     def create_ieee_citation(publication):
         authors = list(publication.authors.all())
         author_string = ""
@@ -42,15 +42,22 @@ def publications(request):
 
         return authors
 
-    context = {
-        'publications': map(lambda pub:
-                            {
-                                "citation": create_ieee_citation(pub),
-                                "pub": pub,
-                                "authors": full_authors(pub),
-                            }, Publication.objects.all())
-    }
-    return render(request, 'portal/publications.html', context)
+    all_pubs = list(map(lambda pub:
+                   {
+                       "citation": create_ieee_citation(pub),
+                       "pub": pub,
+                       "authors": full_authors(pub),
+                   }, Publication.objects.all()))
+    paginator = Paginator(all_pubs, 10)
+
+    if page not in range(1, paginator.num_pages+1):
+        page = 1
+
+    page_obj = paginator.get_page(page)
+
+    return render(request, 'portal/publications.html', {'publications': page_obj,
+                                                        'total_pages': paginator.page_range,
+                                                        'current_page': page})
 
 
 def addPublication(request):
