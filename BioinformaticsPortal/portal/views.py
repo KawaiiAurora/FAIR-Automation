@@ -48,7 +48,7 @@ def publications(request, page):
                        "pub": pub,
                        "authors": full_authors(pub),
                    }, Publication.objects.all()))
-    paginator = Paginator(all_pubs, 10)
+    paginator = Paginator(all_pubs, request.GET.get('pubs_per_page') or 10)
 
     if page not in range(1, paginator.num_pages+1):
         page = 1
@@ -57,7 +57,8 @@ def publications(request, page):
 
     return render(request, 'portal/publications.html', {'publications': page_obj,
                                                         'total_pages': paginator.page_range,
-                                                        'current_page': page})
+                                                        'current_page': page,
+                                                        'pubs_per_page': paginator.per_page})
 
 
 def addPublication(request):
