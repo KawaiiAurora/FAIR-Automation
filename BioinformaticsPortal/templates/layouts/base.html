@@ -3,28 +3,30 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>{% block title %} Title {% endblock %}</title>
-  {% compress css %}
-    <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/_university_style.scss' %}">
-  <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/common.scss' %}">
-  {% endcompress %}
-</head>
-<body>
-<div id="outer_container">
-  {% include './_navigation.html' %}
-  {# Content #}
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %} Title {% endblock %}</title>
+        {% compress css %}
+        <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/_university_style.scss' %}">
+        <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/common.scss' %}">
+        {% endcompress %}
+        <link rel="stylesheet" href="{% static 'typicons/typicons.min.css' %}">
+    </head>
 
-    {% block content %}
-    {% endblock %}
+    <body>
+        <div id="outer_container">
+          {% include './_navigation.html' %}
+          {# Content #}
+
+            {% block content %}
+            {% endblock %}
 
 
-  {# js Deps #}
-</div>
-<script src=" {% static 'libs/jQuery/jQuery3.3.1.js' %}"></script>
-<script src=" {% static 'libs/popper/popper.js' %}"></script>
-<script src=" {% static 'libs/bootstrap/js/bootstrap.js' %}"></script>
+          {# js Deps #}
+        </div>
+        <script src=" {% static 'libs/jQuery/jQuery3.3.1.js' %}"></script>
+        <script src=" {% static 'libs/popper/popper.js' %}"></script>
+        <script src=" {% static 'libs/bootstrap/js/bootstrap.js' %}"></script>
 
-</body>
+    </body>
 </html>

@@ -78,6 +78,11 @@ class PipelineTools(models.Model):
     branch = models.IntegerField(default=0)
 
 
+class PublicationAuthor(models.Model):
+    name = models.CharField(max_length=1000, blank=False, null=False)
+    email = models.EmailField(blank=True, null=True)
+
+
 class Publication(models.Model):
     title = models.CharField(max_length=1000, blank=False, null=False)
     url = models.CharField(max_length=2048, blank=True, null=True)
@@ -86,6 +91,9 @@ class Publication(models.Model):
     year = models.PositiveSmallIntegerField(blank=False, null=False)
     abstract = models.TextField(default="", blank=False, null=False)
     hidden = models.BooleanField(default=False, blank=False, null=False)
+    authors = models.ManyToManyField(PublicationAuthor,
+                                     through='PublicationAssociatedAuthor',
+                                     through_fields=('publication', 'author'))
 
     def clean(self):
         super().clean()
@@ -93,13 +101,7 @@ class Publication(models.Model):
             raise ValidationError('Journal and Conference are both empty')
 
 
-class PublicationAuthor(models.Model):
-    name = models.CharField(max_length=1000, blank=False, null=False)
-    email = models.EmailField(blank=True, null=True)
-
-
 class PublicationAssociatedAuthor(models.Model):
-    publicationId = models.ForeignKey(Publication, on_delete=models.CASCADE)
-    authorId = models.ForeignKey(PublicationAuthor, on_delete=models.CASCADE)
+    publication = models.ForeignKey(Publication, on_delete=models.CASCADE)
+    author = models.ForeignKey(PublicationAuthor, on_delete=models.CASCADE)
     correspondingAuthor = models.BooleanField(default=False, blank=False, null=False)
-

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from portal.models import FairScore, Tool, Findability, Accessibility, Interoperability, Reusability, Pipeline, \
-    PipelineTools, Publication
+    PipelineTools, Publication, PublicationAssociatedAuthor
 from django.contrib.auth.decorators import login_required
 import yaml
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -19,15 +20,35 @@ def index(request):
 
 def publications(request):
     def create_ieee_citation(publication):
+        authors = list(publication.authors.all())
+        author_string = ""
+        for author in authors:
+            if authors.index(author) == len(authors) - 1 & len(authors) != 1:
+                author_string += f' and {author.name},'
+            else:
+                author_string += f' {author.name},'
+
         if publication.journal is not None:
-            return f'Authors, "{publication.title}," <em>{publication.journal}</em>, {publication.year}.'
+            return f'{author_string} "<a href={publication.url}>{publication.title},</a>" <em>{publication.journal}</em>, {publication.year}.'
         elif publication.conference is not None:
-            return f'Authors, "{publication.title}," presented at the {publication.conference}, {publication.year}'
+            return f'{author_string} "<a href={publication.url}>{publication.title},</a>" presented at the {publication.conference}, {publication.year}'
         else:
-            return f'Authors, "{publication.title},", {publication.year}.'
+            return f'{author_string}, "{publication.title},", {publication.year}.'
+
+    def full_authors(publication):
+        authors = list(publication.authors.all())
+        for author in authors:
+            author.corresponding = PublicationAssociatedAuthor.objects.get(id=author.id).correspondingAuthor
+
+        return authors
 
     context = {
-        'publications': map(lambda pub: create_ieee_citation(pub), Publication.objects.all())
+        'publications': map(lambda pub:
+                            {
+                                "citation": create_ieee_citation(pub),
+                                "pub": pub,
+                                "authors": full_authors(pub),
+                            }, Publication.objects.all())
     }
     return render(request, 'portal/publications.html', context)
 

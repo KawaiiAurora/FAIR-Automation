@@ -62,13 +62,5 @@ class Migration(migrations.Migration):
             model_name='publication',
             name='name',
             field=models.CharField(max_length=1000),
-        ),
-        migrations.CreateModel(
-            name='CorrespondingAuthor',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('authorID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='portal.publicationauthor')),
-                ('publicationId', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='portal.publication')),
-            ],
-        ),
+        )
     ]

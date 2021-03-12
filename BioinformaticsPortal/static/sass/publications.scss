@@ -16,3 +16,17 @@ table td{
 table td:not(:last-child){
 	border-right: 1px solid #dee2e6
 }
+
+button{
+	border: none;
+	padding: 0;
+	background-color: transparent;
+}
+
+button:focus{
+	outline: none;
+}
+
+.collapse{
+	overflow: hidden;
+}
