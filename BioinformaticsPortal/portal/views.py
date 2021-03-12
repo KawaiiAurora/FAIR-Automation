@@ -10,6 +10,7 @@ from googleapiclient.discovery import build
 from selenium import webdriver
 from crossref.restful import Works, Journals
 import requests
+import math
 
 
 def index(request):
@@ -43,9 +44,16 @@ def publications(request, current_page):
         return authors
 
     def det_shown_page_range(full_page_range, pages_to_view):
-        pages_ahead = len(full_page_range) - (pages_to_view - 1)
+        pages_ahead = len(full_page_range) - (pages_to_view - 2)
         if current_page < pages_ahead:
-            return full_page_range[current_page - 1:current_page + (pages_to_view-1)]
+            start_pos = current_page - 2
+            end_pos = current_page + (pages_to_view - 2)
+            if start_pos < 0:
+                start_pos = 0
+            if end_pos-start_pos != pages_to_view:
+                end_pos += 1
+
+            return full_page_range[start_pos:end_pos]
         else:
             start_page = len(full_page_range) - pages_to_view
             return full_page_range[start_page:]
@@ -65,7 +73,7 @@ def publications(request, current_page):
 
     return render(request, 'portal/publications.html', {'publications': page_obj,
                                                         'total_pages': paginator.page_range,
-                                                        'shown_pages': det_shown_page_range(paginator.page_range, 5),
+                                                        'shown_pages': det_shown_page_range(paginator.page_range, 4),
                                                         'current_page': current_page,
                                                         'pubs_per_page': paginator.per_page})
 
