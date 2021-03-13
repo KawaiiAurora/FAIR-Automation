@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from portal.models import FairScore, Tool, Findability, Accessibility, Interoperability, Reusability, Pipeline, \
-    PipelineTools, Publication, PublicationAssociatedAuthor
+    PipelineTools, Publication, PublicationAuthor, PublicationAssociatedAuthor
 from django.contrib.auth.decorators import login_required
 import yaml
 from django.core.exceptions import ObjectDoesNotExist
@@ -24,7 +24,7 @@ def publications(request, current_page):
         authors = list(publication.authors.all())
         author_string = ""
         for author in authors:
-            if authors.index(author) == len(authors) - 1 & len(authors) != 1:
+            if authors.index(author) == len(authors) - 1 and len(authors) != 1:
                 author_string += f' and {author.name},'
             else:
                 author_string += f' {author.name},'
@@ -39,7 +39,7 @@ def publications(request, current_page):
     def full_authors(publication):
         authors = list(publication.authors.all())
         for author in authors:
-            author.corresponding = PublicationAssociatedAuthor.objects.get(id=author.id).correspondingAuthor
+            author.corresponding = PublicationAssociatedAuthor.objects.get(author_id=author.id).correspondingAuthor
 
         return authors
 
@@ -80,7 +80,9 @@ def publications(request, current_page):
 def add_publication(request, is_edit=False, pub_obj=None):
     if request.method == "POST":
         form = PublicationForm(request.POST)
-        if form.is_valid():
+        author_form_set = formset_factory(AuthorForm)
+        author_form_set = author_form_set(request.POST)
+        if form.is_valid() and author_form_set.is_valid():
             title = form.cleaned_data['title']
             url = form.cleaned_data['url']
             pub_type = form.cleaned_data['pubType']
@@ -97,7 +99,19 @@ def add_publication(request, is_edit=False, pub_obj=None):
                 'abstract': abstract,
                 'hidden': hidden
             }
-            Publication.objects.create(**attributes)
+            new_pub = Publication(**attributes)
+            new_pub.save()
+            for author_form in author_form_set:
+                if author_form.is_valid():
+                    name = author_form.cleaned_data['name']
+                    email = author_form.cleaned_data['email']
+                    corresponding = author_form.cleaned_data['corresponding']
+                    new_author = PublicationAuthor(name=name, email=email)
+                    new_author.save()
+                    PublicationAssociatedAuthor.objects.create(publication=new_pub,
+                                                       author=new_author,
+                                                       correspondingAuthor=corresponding)
+
             return HttpResponseRedirect('/portal/publications/1')
     else:
         if is_edit:
@@ -113,9 +127,6 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                             })
         else:
             form = PublicationForm()
-            data = {
-                'form-MIN_NUM_FORMS': '1'
-            }
             author_form_set = formset_factory(AuthorForm)
 
     context = {
