@@ -52,6 +52,7 @@
                             <p class="m-0 pt-2">
                                 Journal: {{ publication.pub.journal }}
                             </p>
+                            <a class="btn btn-outline-primary mt-2" href="{% url 'edit_publication' publication.pub.id %}">Edit Publication</a>
                         </p>
                     </div>
                 </div>
