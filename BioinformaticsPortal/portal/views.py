@@ -49,7 +49,7 @@ def publications(request, current_page):
             end_pos = current_page + (pages_to_view - 2)
             if start_pos < 0:
                 start_pos = 0
-            if end_pos-start_pos != pages_to_view:
+            if end_pos - start_pos != pages_to_view:
                 end_pos += 1
             return full_page_range[start_pos:end_pos]
         else:
@@ -76,7 +76,7 @@ def publications(request, current_page):
                                                         'pubs_per_page': paginator.per_page})
 
 
-def add_publication(request):
+def add_publication(request, is_edit=False, pub_obj=None):
     if request.method == "POST":
         form = PublicationForm(request.POST)
         if form.is_valid():
@@ -99,12 +99,29 @@ def add_publication(request):
             Publication.objects.create(**attributes)
             return HttpResponseRedirect('/portal/publications/1')
     else:
-        form = PublicationForm()
+        if is_edit:
+            form = PublicationForm(initial={'title': pub_obj.title,
+                                            'url': pub_obj.url,
+                                            'pubType': ('journal' if pub_obj.journal is not None else 'conference'),
+                                            'typeName': (
+                                                pub_obj.journal if pub_obj.journal is not None else pub_obj.conference
+                                            ),
+                                            'year': pub_obj.year,
+                                            'abstract': pub_obj.abstract,
+                                            'hidden': pub_obj.hidden
+                                            })
+        else:
+            form = PublicationForm()
 
     context = {
-        'form': form
+        'form': form,
+        'is_edit': is_edit
     }
     return render(request, 'portal/publications/add.html', context)
+
+
+def edit_publication(request, pub_id):
+    return add_publication(request, True, Publication.objects.filter(id=pub_id).first())
 
 
 def tools(request):

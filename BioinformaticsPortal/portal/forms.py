@@ -5,7 +5,7 @@ import datetime
 class PublicationForm(forms.Form):
     required_css_class = 'required_label'
     title = forms.CharField(max_length=1000, label="Publication Title", required="true", label_suffix='')
-    
+
     url = forms.URLField(max_length=2048, label="URL", required="false", label_suffix='')
     pubType = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'custom-select', 'onchange': 'updateTypeName(this)'}),

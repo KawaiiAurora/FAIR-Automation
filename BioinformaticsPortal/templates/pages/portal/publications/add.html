@@ -17,9 +17,9 @@
 
     <div class="container">
         <div class="d-flex flex-column mb-4">
-            <h3>Add Publication</h3>
+            <h3>{% if is_edit %}Edit{% else %}Add{% endif %} Publication</h3>
             <a class="align-self-start" href="{% url 'publications' 1 %}">Back to publications</a>
-            <p class="mt-4">Please fill in the form below to add a publication</p>
+            <p class="mt-4">Please {% if is_edit %}modify{% else %}fill in{% endif %} the form below to {% if is_edit %}edit the{% else %}add a{% endif %} publication</p>
         </div>
         <div class="mb-4">
             <form method=POST>
@@ -43,8 +43,10 @@
                 {% endfor %}
                 <br>
                 <br>
-                <input class="btn btn-outline-primary" type=submit value='Add Publication'>
+                <input class="btn btn-outline-primary" type=submit value='{% if is_edit %}Edit{% else %}Add{% endif %} Publication'>
             </form>
         </div>
     </div>
+
+    <script>updateTypeName(document.getElementById("id_pubType"))</script>
 {% endblock %}
