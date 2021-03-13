@@ -24,6 +24,14 @@ input[type='submit']{
   content: '';
 }
 
+.author-outer-wrapper{
+  width: 100%;
+  max-width: 700px;
+  padding: 20px 0 0 30px;
+  border: 1px solid gray;
+  border-radius: 10px;
+}
+
 .author-form-wrapper{
   border: solid grey 1px;
   border-radius: 10px;
@@ -32,10 +40,3 @@ input[type='submit']{
   width: 70%;
 }
 
-.author-outer-wrapper{
-  width: 100%;
-  max-width: 700px;
-  padding: 20px 0 0 20px;
-  border: 1px solid gray;
-  border-radius: 10px;
-}

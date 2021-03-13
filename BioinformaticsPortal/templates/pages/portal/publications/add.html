@@ -37,12 +37,10 @@
                     {{ author_form_set.management_form }}
                     <div class="author-outer-wrapper" id="author_form_set">
                         <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Add Author</button>
+                        <button onclick="removeAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Last Author</button>
                         {% for author_form in author_form_set %}
-                            <div class="author-form-wrapper">
-                                <p>
-                                    Author {{ forloop.counter }}
-                                </p>
-                                {% for field in author_form.visible_fields %}
+                            <div id="author_form_{{ forloop.counter0 }}" class="author-form-wrapper">
+                                {% for field in author_form.visible_fields|slice:"0:2" %}
                                     <div class="fieldWrapper mb-2">
                                         {{ field.errors }}
                                         <p class="mb-2">
@@ -51,6 +49,13 @@
                                         {{ field }}
                                     </div>
                                 {% endfor %}
+                                <div class="fieldWrapper mb-2 input-width-auto">
+                                    <p>
+                                        {{ author_form.corresponding.errors }}
+                                    </p>
+                                    {{ author_form.corresponding.label_tag }}
+                                    {{ author_form.corresponding }}
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
@@ -81,12 +86,8 @@
     </div>
 
     <div id="empty_form" style="display:none">
-        <div class="author-form-wrapper">
-            <p>
-                Author n
-            </p>
-            <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
-            {% for field in author_form_set.empty_form.visible_fields %}
+        <div id="author_form_" class="author-form-wrapper">
+            {% for field in author_form_set.empty_form.visible_fields|slice:"0:2" %}
                 <div class="fieldWrapper mb-2">
                     {{ field.errors }}
                     <p class="mb-2">
@@ -95,6 +96,13 @@
                     {{ field }}
                 </div>
             {% endfor %}
+            <div class="fieldWrapper mb-2 input-width-auto">
+                <p>
+                    {{ author_form_set.empty_form.corresponding.errors }}
+                </p>
+                {{ author_form_set.empty_form.corresponding.label_tag }}
+                {{ author_form_set.empty_form.corresponding }}
+            </div>
         </div>
     </div>
 
