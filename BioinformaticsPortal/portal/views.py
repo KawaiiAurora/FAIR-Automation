@@ -78,6 +78,24 @@ def publications(request, current_page):
 
 
 def add_publication(request, is_edit=False, pub_obj=None):
+    def full_authors(publication):
+        authors = list(publication.authors.all())
+        for author in authors:
+            author.corresponding = PublicationAssociatedAuthor.objects.get(author_id=author.id).correspondingAuthor
+        print(authors)
+
+        return authors
+
+    def author_to_formset(authors):
+        result = []
+        for author in authors:
+            result.append({
+                'name': author.name,
+                'email': author.email,
+                'corresponding': author.corresponding
+            })
+        return result
+
     if request.method == "POST":
         form = PublicationForm(request.POST)
         author_form_set = formset_factory(AuthorForm)
@@ -109,8 +127,8 @@ def add_publication(request, is_edit=False, pub_obj=None):
                     new_author = PublicationAuthor(name=name, email=email)
                     new_author.save()
                     PublicationAssociatedAuthor.objects.create(publication=new_pub,
-                                                       author=new_author,
-                                                       correspondingAuthor=corresponding)
+                                                               author=new_author,
+                                                               correspondingAuthor=corresponding)
 
             return HttpResponseRedirect('/portal/publications/1')
     else:
@@ -126,6 +144,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                             'hidden': pub_obj.hidden
                                             })
             author_form_set = formset_factory(AuthorForm)
+            author_form_set = author_form_set(initial=author_to_formset(full_authors(pub_obj)))
         else:
             form = PublicationForm()
             author_form_set = formset_factory(AuthorForm)
