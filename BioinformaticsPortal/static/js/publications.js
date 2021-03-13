@@ -5,6 +5,5 @@ function togglePub(iconId){
 }
 
 function updatePagination(currentURL, select){
-    console.log("test");
     window.location.href = currentURL+"?pubs_per_page="+select.value;
 }

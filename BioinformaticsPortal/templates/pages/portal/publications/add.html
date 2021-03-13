@@ -9,6 +9,10 @@
         {% compress css %}
             <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/add_publication.scss' %}">
         {% endcompress %}
+
+        {% compress js %}
+            <script src="{% static 'js/add_publication.js' %}" type="text/javascript" charset="utf-8"></script>
+        {% endcompress %}
     </head>
 
     <div class="container">
