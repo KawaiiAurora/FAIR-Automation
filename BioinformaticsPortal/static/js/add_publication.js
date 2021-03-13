@@ -1,3 +1,4 @@
 function updateTypeName(select){
-    $('label[for="id_typeName"]').html(select.options[select.selectedIndex].text)
+    let text = ['Journal Name', 'Conference Name']
+    $('label[for="id_typeName"]').html(text[select.selectedIndex])
 }

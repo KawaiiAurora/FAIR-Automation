@@ -82,17 +82,22 @@ def add_publication(request):
         if form.is_valid():
             title = form.cleaned_data['title']
             url = form.cleaned_data['url']
-            journal = form.cleaned_data['journal']
-            conference = form.cleaned_data['conference']
+            pub_type = form.cleaned_data['pubType']
+            type_name = form.cleaned_data['typeName']
             year = form.cleaned_data['year']
             abstract = form.cleaned_data['abstract']
             hidden = form.cleaned_data['hidden']
-            return HttpResponseRedirect('/publications/1')
-        publication_name = request.POST['name']
-        publication_author = request.POST['author']
-        publication_link = request.POST['link']
-        publication = Publication.objects.create(name=publication_name, authors=publication_author,
-                                                 link=publication_link)
+
+            attributes = {
+                'title': title,
+                'url': url,
+                pub_type: type_name,
+                'year': year,
+                'abstract': abstract,
+                'hidden': hidden
+            }
+            Publication.objects.create(**attributes)
+            return HttpResponseRedirect('/portal/publications/1')
     else:
         form = PublicationForm()
 
