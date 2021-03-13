@@ -21,7 +21,7 @@
             <a class="align-self-start" href="{% url 'publications' 1 %}">Back to publications</a>
             <p class="mt-4">Please fill in the form below to add a publication</p>
         </div>
-        <div>
+        <div class="mb-4">
             <form method=POST>
                 {% csrf_token %}
                 {% for field in form.visible_fields %}
@@ -43,7 +43,7 @@
                 {% endfor %}
                 <br>
                 <br>
-                <input class="btn btn-outline-primary rounded-0" type=submit value='Add Publication'>
+                <input class="btn btn-outline-primary" type=submit value='Add Publication'>
             </form>
         </div>
     </div>
