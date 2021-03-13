@@ -1,6 +1,7 @@
 input, textarea, select{
   padding: 10px 15px;
-  width: 70% !important;
+  width: 100% !important;
+  max-width: 700px;
   border: 1px solid black !important;
 }
 
@@ -21,4 +22,20 @@ input[type='submit']{
 
 .input-width-auto label.required_label::after{
   content: '';
+}
+
+.author-form-wrapper{
+  border: solid grey 1px;
+  border-radius: 10px;
+  padding: 20px 20px 0 20px;
+  margin: 0 0 20px 0;
+  width: 70%;
+}
+
+.author-outer-wrapper{
+  width: 100%;
+  max-width: 700px;
+  padding: 20px 0 0 20px;
+  border: 1px solid gray;
+  border-radius: 10px;
 }

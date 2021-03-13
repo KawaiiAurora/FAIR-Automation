@@ -23,28 +23,78 @@
         <div class="mb-4">
             <form method=POST>
                 {% csrf_token %}
-                {% for field in form.visible_fields %}
-                    {% if field.name not in 'hidden' %}
-                        <div class="fieldWrapper mb-2">
-                            {{ field.errors }}
-                            <p class="mb-2">
-                                {{ field.label_tag }}
-                            </p>
-                            {{ field }}
-                        </div>
-                    {% elif field.name == 'hidden' %}
-                        <div class="fieldWrapper mb-2 input-width-auto">
-                            {{ field.errors }}
+                <div class="fieldWrapper mb-2">
+                    <p>
+                        {{ form.title.errors }}
+                    </p>
+                    <p class="mb-2">
+                        {{ form.title.label_tag }}
+                    </p>
+                    {{ form.title }}
+                </div>
+                <div class="fieldWrapper mb-2">
+                    <p>Authors</p>
+                    {{ author_form_set.management_form }}
+                    <div class="author-outer-wrapper" id="author_form_set">
+                        <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Add Author</button>
+                        {% for author_form in author_form_set %}
+                            <div class="author-form-wrapper">
+                                <p>
+                                    Author {{ forloop.counter }}
+                                </p>
+                                {% for field in author_form.visible_fields %}
+                                    <div class="fieldWrapper mb-2">
+                                        {{ field.errors }}
+                                        <p class="mb-2">
+                                            {{ field.label_tag }}
+                                        </p>
+                                        {{ field }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% for field in form.visible_fields|slice:"1:6" %}
+                    <div class="fieldWrapper mb-2">
+                        {{ field.errors }}
+                        <p class="mb-2">
                             {{ field.label_tag }}
-                            {{ field }}
-                        </div>
-                    {% endif %}
+                        </p>
+                        {{ field }}
+                    </div>
                 {% endfor %}
+                <div class="fieldWrapper mb-2 input-width-auto">
+                    <p>
+                        {{ form.hidden.errors }}
+                    </p>
+                    {{ form.hidden.label_tag }}
+                    {{ form.hidden }}
+                </div>
+
                 <br>
                 <br>
                 <input class="btn btn-outline-primary" type=submit value='{% if is_edit %}Edit{% else %}Add{% endif %} Publication'>
                 <a class="btn btn-outline-primary" href="{% url 'publications' 1 %}">Back to publications</a>
             </form>
+        </div>
+    </div>
+
+    <div id="empty_form" style="display:none">
+        <div class="author-form-wrapper">
+            <p>
+                Author n
+            </p>
+            <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
+            {% for field in author_form_set.empty_form.visible_fields %}
+                <div class="fieldWrapper mb-2">
+                    {{ field.errors }}
+                    <p class="mb-2">
+                        {{ field.label_tag }}
+                    </p>
+                    {{ field }}
+                </div>
+            {% endfor %}
         </div>
     </div>
 

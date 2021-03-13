@@ -9,7 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from googleapiclient.discovery import build
 from selenium import webdriver
 from crossref.restful import Works
-from .forms import PublicationForm
+from django.forms import formset_factory
+from .forms import PublicationForm, AuthorForm
 
 
 def index(request):
@@ -112,9 +113,14 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                             })
         else:
             form = PublicationForm()
+            data = {
+                'form-MIN_NUM_FORMS': '1'
+            }
+            author_form_set = formset_factory(AuthorForm)
 
     context = {
         'form': form,
+        'author_form_set': author_form_set,
         'is_edit': is_edit
     }
     return render(request, 'portal/publications/add.html', context)
