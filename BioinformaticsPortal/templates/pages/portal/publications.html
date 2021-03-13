@@ -71,7 +71,7 @@
                     <a class="page-link" href="{% url 'publications' pageNo %}?pubs_per_page={{ pubs_per_page }}">{{pageNo}}</a>
                 </li>
             {% endfor %}
-            {% if current_page < total_pages|last %}
+            {% if not last_page %}
                 <li class="page-item"><a class="page-link" href="{% url 'publications' current_page|add:"1" %}?pubs_per_page={{ pubs_per_page }}">Next</a></li>
             {% endif %}
             <p class="pagination_text ml-2 mb-0 p-0 d-inline">Publications per page: </p>

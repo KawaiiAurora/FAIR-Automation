@@ -1,16 +1,15 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from portal.models import FairScore, Tool, Findability, Accessibility, Interoperability, Reusability, Pipeline, \
     PipelineTools, Publication, PublicationAssociatedAuthor
 from django.contrib.auth.decorators import login_required
 import yaml
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ObjectDoesNotExist
 from googleapiclient.discovery import build
 from selenium import webdriver
-from crossref.restful import Works, Journals
-import requests
-import math
+from crossref.restful import Works
+from .forms import PublicationForm
 
 
 def index(request):
@@ -52,7 +51,6 @@ def publications(request, current_page):
                 start_pos = 0
             if end_pos-start_pos != pages_to_view:
                 end_pos += 1
-
             return full_page_range[start_pos:end_pos]
         else:
             start_page = len(full_page_range) - pages_to_view
@@ -72,32 +70,34 @@ def publications(request, current_page):
     page_obj = paginator.get_page(current_page)
 
     return render(request, 'portal/publications.html', {'publications': page_obj,
-                                                        'total_pages': paginator.page_range,
+                                                        'last_page': current_page == paginator.page_range[-1],
                                                         'shown_pages': det_shown_page_range(paginator.page_range, 4),
                                                         'current_page': current_page,
                                                         'pubs_per_page': paginator.per_page})
 
 
-def addPublication(request):
-    if request.POST:
+def add_publication(request):
+    if request.method == "POST":
+        form = PublicationForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            url = form.cleaned_data['url']
+            journal = form.cleaned_data['journal']
+            conference = form.cleaned_data['conference']
+            year = form.cleaned_data['year']
+            abstract = form.cleaned_data['abstract']
+            hidden = form.cleaned_data['hidden']
+            return HttpResponseRedirect('/publications/1')
         publication_name = request.POST['name']
         publication_author = request.POST['author']
         publication_link = request.POST['link']
         publication = Publication.objects.create(name=publication_name, authors=publication_author,
                                                  link=publication_link)
-        # TODO: if combination of name, authors, link already exists, show error
-        # TODO: perhaps its better to use a forms class
-        # for error use something like this, or else simply say success and do not add object
-        # context={
-        # 'action': 'postform'
-        # 'result': 'error - publication already exists'
-        # }
+    else:
+        form = PublicationForm()
 
-        # return render(request, 'portal/publications.html', context)
-        return redirect('../publications/')
     context = {
-        'action': 'fillform',
-        'publications': Publication.objects.all()
+        'form': form
     }
     return render(request, 'portal/publications/add.html', context)
 
