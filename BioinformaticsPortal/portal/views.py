@@ -125,6 +125,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                             'abstract': pub_obj.abstract,
                                             'hidden': pub_obj.hidden
                                             })
+            author_form_set = formset_factory(AuthorForm)
         else:
             form = PublicationForm()
             author_form_set = formset_factory(AuthorForm)
