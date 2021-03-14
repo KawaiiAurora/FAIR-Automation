@@ -13,12 +13,10 @@ function removeAuthor(val){
     let form_idx = $('#id_form-TOTAL_FORMS').val();
     $(`#author_form_${val}`).remove();
     //Update existing forms
-    let author_forms = $(`[id^=author_form_]`);
+    let author_forms = $(`[id^=author_form_]`); //get author forms
     delete author_forms[0] //remove first item (wrapper)
     delete author_forms[author_forms.length-1] //remove last item (empty form)
-    author_forms.length -= 2;
-
-    author_forms = Object.values(author_forms).slice(0,2)
+    author_forms = Object.values(author_forms).slice(0,author_forms.length-2); //getting only relevant values
     for(let x = 0; x < author_forms.length; x++){
         author_forms[x].id = `author_form_${x}`;
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/removeAuthor\(\d*/gm,`removeAuthor(${x}`);
@@ -26,7 +24,11 @@ function removeAuthor(val){
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/id="id_form-\d*/gm,`id="id_form-${x}`);
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/name="form-\d*/gm,`name="form-${x}`);
     }
-
-    console.log(author_forms);
     $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) - 1);
+}
+
+function updateCorresponding(checkBox){
+    let form_num = checkBox.id.replace("id_form-","").replace("-corresponding","");
+    $(`#id_form-${form_num}-email`)[0].toggleAttribute("required")
+    $(`label[for='id_form-${form_num}-email'`).toggleClass("required_label")
 }
