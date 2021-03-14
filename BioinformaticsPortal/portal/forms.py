@@ -22,7 +22,7 @@ class PublicationForm(forms.Form):
 
 class AuthorForm(forms.Form):
     required_css_class = 'required_label'
-    name = forms.CharField(max_length=1000, label="Author Name", required="true", label_suffix='')
+    name = forms.CharField(max_length=1000, label="Author Name", required=True, label_suffix='')
     email = forms.EmailField(label="Author Email", required="false", label_suffix='')
     corresponding = forms.BooleanField(initial=False, label="Corresponding Author:", required=False,
                                        label_suffix='')

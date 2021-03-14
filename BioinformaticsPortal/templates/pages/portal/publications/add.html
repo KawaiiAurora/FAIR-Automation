@@ -24,18 +24,23 @@
             <form method=POST>
                 {% csrf_token %}
                 <div class="fieldWrapper mb-2">
-                    <p>
-                        {{ form.title.errors }}
-                    </p>
                     <p class="mb-2">
                         {{ form.title.label_tag }}
                     </p>
                     {{ form.title }}
+                    <p>
+                        {{ form.title.errors }}
+                    </p>
                 </div>
                 <div class="fieldWrapper mb-2">
                     <p>Authors</p>
                     {{ author_form_set.management_form }}
                     <div class="author-outer-wrapper" id="author_form_set">
+                        <p>
+                            First and middle names of authors should be abbreviated to a single letter.
+                            <br/>
+                            Corresponding authors must have an e-mail address.
+                        </p>
                         <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Add Author</button>
                         <button onclick="removeAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Last Author</button>
                         {% for author_form in author_form_set %}
@@ -50,11 +55,11 @@
                                     </div>
                                 {% endfor %}
                                 <div class="fieldWrapper mb-2 input-width-auto">
+                                    {{ author_form.corresponding.label_tag }}
+                                    {{ author_form.corresponding }}
                                     <p>
                                         {{ author_form.corresponding.errors }}
                                     </p>
-                                    {{ author_form.corresponding.label_tag }}
-                                    {{ author_form.corresponding }}
                                 </div>
                             </div>
                         {% endfor %}
@@ -62,19 +67,21 @@
                 </div>
                 {% for field in form.visible_fields|slice:"1:6" %}
                     <div class="fieldWrapper mb-2">
-                        {{ field.errors }}
                         <p class="mb-2">
                             {{ field.label_tag }}
                         </p>
                         {{ field }}
+                        <p>
+                            {{ field.errors }}
+                        </p>
                     </div>
                 {% endfor %}
                 <div class="fieldWrapper mb-2 input-width-auto">
+                    {{ form.hidden.label_tag }}
+                    {{ form.hidden }}
                     <p>
                         {{ form.hidden.errors }}
                     </p>
-                    {{ form.hidden.label_tag }}
-                    {{ form.hidden }}
                 </div>
 
                 <br>
@@ -89,19 +96,21 @@
         <div id="author_form_" class="author-form-wrapper">
             {% for field in author_form_set.empty_form.visible_fields|slice:"0:2" %}
                 <div class="fieldWrapper mb-2">
-                    {{ field.errors }}
                     <p class="mb-2">
                         {{ field.label_tag }}
                     </p>
                     {{ field }}
+                    <p>
+                        {{ field.errors }}
+                    </p>
                 </div>
             {% endfor %}
             <div class="fieldWrapper mb-2 input-width-auto">
+                {{ author_form_set.empty_form.corresponding.label_tag }}
+                {{ author_form_set.empty_form.corresponding }}
                 <p>
                     {{ author_form_set.empty_form.corresponding.errors }}
                 </p>
-                {{ author_form_set.empty_form.corresponding.label_tag }}
-                {{ author_form_set.empty_form.corresponding }}
             </div>
         </div>
     </div>

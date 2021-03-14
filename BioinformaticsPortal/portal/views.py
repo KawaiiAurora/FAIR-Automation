@@ -13,6 +13,14 @@ from django.forms import formset_factory
 from .forms import PublicationForm, AuthorForm
 
 
+def full_authors(publication):
+    authors = list(publication.authors.all())
+    for author in authors:
+        author.corresponding = PublicationAssociatedAuthor.objects.get(author_id=author.id).correspondingAuthor
+    print(authors)
+
+    return authors
+
 def index(request):
     return render(request, 'portal/index.html', {
         'view_name': 'Home'
@@ -35,13 +43,6 @@ def publications(request, current_page):
             return f'{author_string} "<a href={publication.url}>{publication.title},</a>" presented at the {publication.conference}, {publication.year}'
         else:
             return f'{author_string}, "{publication.title},", {publication.year}.'
-
-    def full_authors(publication):
-        authors = list(publication.authors.all())
-        for author in authors:
-            author.corresponding = PublicationAssociatedAuthor.objects.get(author_id=author.id).correspondingAuthor
-
-        return authors
 
     def det_shown_page_range(full_page_range, pages_to_view):
         pages_ahead = len(full_page_range) - (pages_to_view - 2)
@@ -78,14 +79,6 @@ def publications(request, current_page):
 
 
 def add_publication(request, is_edit=False, pub_obj=None):
-    def full_authors(publication):
-        authors = list(publication.authors.all())
-        for author in authors:
-            author.corresponding = PublicationAssociatedAuthor.objects.get(author_id=author.id).correspondingAuthor
-        print(authors)
-
-        return authors
-
     def author_to_formset(authors):
         result = []
         for author in authors:
@@ -117,17 +110,35 @@ def add_publication(request, is_edit=False, pub_obj=None):
                 'abstract': abstract,
                 'hidden': hidden
             }
-            new_pub = Publication(**attributes)
-            new_pub.save()
+            if is_edit:
+                pub_obj.title = title
+                pub_obj.url = url
+                pub_obj.conference = None
+                pub_obj.journal = None
+                setattr(pub_obj, pub_type, type_name)
+                pub_obj.year = year
+                pub_obj.abstract = abstract
+                pub_obj.hidden = hidden
+                # remove associated authors as they are re-built
+                pub_obj.authors.clear()
+                pub_obj.save()
+            else:
+                new_pub = Publication(**attributes)
+                new_pub.save()
             for author_form in author_form_set:
                 if author_form.is_valid():
                     name = author_form.cleaned_data['name']
                     email = author_form.cleaned_data['email']
                     corresponding = author_form.cleaned_data['corresponding']
-                    new_author = PublicationAuthor(name=name, email=email)
-                    new_author.save()
-                    PublicationAssociatedAuthor.objects.create(publication=new_pub,
-                                                               author=new_author,
+                    # look up existing author
+                    author = PublicationAuthor.objects.filter(name=name, email=email).first()
+                    if author is None:
+                        author = PublicationAuthor(name=name, email=email)
+                        author.save()
+
+                    assoc_pub = pub_obj if is_edit else new_pub
+                    PublicationAssociatedAuthor.objects.create(publication=assoc_pub,
+                                                               author=author,
                                                                correspondingAuthor=corresponding)
 
             return HttpResponseRedirect('/portal/publications/1')
