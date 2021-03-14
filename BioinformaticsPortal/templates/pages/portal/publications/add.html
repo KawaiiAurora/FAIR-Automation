@@ -42,9 +42,11 @@
                             Corresponding authors must have an e-mail address.
                         </p>
                         <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Add Author</button>
-                        <button onclick="removeAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Last Author</button>
                         {% for author_form in author_form_set %}
                             <div id="author_form_{{ forloop.counter0 }}" class="author-form-wrapper">
+                                {% if forloop.counter0 != 0 %}
+                                <button onclick="removeAuthor({{ forloop.counter0 }})" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
+                                {% endif %}
                                 {% for field in author_form.visible_fields|slice:"0:2" %}
                                     <div class="fieldWrapper mb-2">
                                         {{ field.errors }}
@@ -94,6 +96,7 @@
 
     <div id="empty_form" style="display:none">
         <div id="author_form_" class="author-form-wrapper">
+            <button onclick="removeAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
             {% for field in author_form_set.empty_form.visible_fields|slice:"0:2" %}
                 <div class="fieldWrapper mb-2">
                     <p class="mb-2">

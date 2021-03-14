@@ -87,6 +87,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
                 'email': author.email,
                 'corresponding': author.corresponding
             })
+        print(len(result))
         return result
 
     if request.method == "POST":
@@ -154,8 +155,9 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                             'abstract': pub_obj.abstract,
                                             'hidden': pub_obj.hidden
                                             })
-            author_form_set = formset_factory(AuthorForm)
-            author_form_set = author_form_set(initial=author_to_formset(full_authors(pub_obj)))
+            form_set_authors = author_to_formset(full_authors(pub_obj))
+            author_form_set = formset_factory(AuthorForm, extra=(1 if len(form_set_authors) == 0 else 0))
+            author_form_set = author_form_set(initial=form_set_authors)
         else:
             form = PublicationForm()
             author_form_set = formset_factory(AuthorForm)
