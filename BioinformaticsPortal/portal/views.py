@@ -162,6 +162,10 @@ def add_publication(request, is_edit=False, pub_obj=None):
             form = PublicationForm()
             author_form_set = formset_factory(AuthorForm)
 
+        for author_form in author_form_set:
+            author_form.use_required_attribute = True
+            author_form.empty_permitted = False
+
     context = {
         'form': form,
         'author_form_set': author_form_set,

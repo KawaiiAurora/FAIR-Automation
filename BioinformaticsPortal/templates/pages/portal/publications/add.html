@@ -49,11 +49,13 @@
                                 {% endif %}
                                 {% for field in author_form.visible_fields|slice:"0:2" %}
                                     <div class="fieldWrapper mb-2">
-                                        {{ field.errors }}
                                         <p class="mb-2">
                                             {{ field.label_tag }}
                                         </p>
                                         {{ field }}
+                                        <p>
+                                            {{ field.errors }}
+                                        </p>
                                     </div>
                                 {% endfor %}
                                 <div class="fieldWrapper mb-2 input-width-auto">
@@ -97,17 +99,24 @@
     <div id="empty_form" style="display:none">
         <div id="author_form_" class="author-form-wrapper">
             <button onclick="removeAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
-            {% for field in author_form_set.empty_form.visible_fields|slice:"0:2" %}
-                <div class="fieldWrapper mb-2">
-                    <p class="mb-2">
-                        {{ field.label_tag }}
-                    </p>
-                    {{ field }}
-                    <p>
-                        {{ field.errors }}
-                    </p>
-                </div>
-            {% endfor %}
+            <div class="fieldWrapper mb-2">
+                <p class="mb-2">
+                    {{ author_form_set.empty_form.name.label_tag }}
+                </p>
+                <input type="text" name="form-__prefix__-name" maxlength="1000" id="id_form-__prefix__-name" required="">
+                <p>
+                    {{ author_form_set.empty_form.name.errors }}
+                </p>
+            </div>
+            <div class="fieldWrapper mb-2">
+                <p class="mb-2">
+                    {{ author_form_set.empty_form.email.label_tag }}
+                </p>
+                {{ author_form_set.empty_form.email }}
+                <p>
+                    {{ author_form_set.empty_form.email.errors }}
+                </p>
+            </div>
             <div class="fieldWrapper mb-2 input-width-auto">
                 {{ author_form_set.empty_form.corresponding.label_tag }}
                 {{ author_form_set.empty_form.corresponding }}
