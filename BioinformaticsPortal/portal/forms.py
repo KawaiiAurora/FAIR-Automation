@@ -38,6 +38,6 @@ class AuthorForm(forms.Form):
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
         corresponding = cleaned_data.get("corresponding")
-        if corresponding and email == "":
+        if corresponding and (email == "" or email is None):
             self.add_error("email",
                            ValidationError("Corresponding authors must have an e-mail address associated with them"))

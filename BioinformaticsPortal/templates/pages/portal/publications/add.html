@@ -42,6 +42,8 @@
                             First and middle names of authors should be abbreviated to a single letter.
                             <br/>
                             Corresponding authors must have an e-mail address.
+                            <br/>
+                            At least one author must be added.
                         </p>
                         <div class="d-flex mr-2 mb-4">
                             <select id='existing-author-select' class='custom-select combobox background-none'>
@@ -55,26 +57,33 @@
                         <button onclick="addNewAuthor()" class="btn btn-outline-primary mb-4" type="button">Add New Author</button>
                         {% for author_form in author_form_set %}
                             <div id="author_form_{{ forloop.counter0 }}" class="author-form-wrapper">
-                                {% if forloop.counter0 != 0 %}
-                                <button onclick="removeAuthor({{ forloop.counter0 }})" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
-                                {% endif %}
-                                {% for field in author_form.visible_fields|slice:"0:2" %}
-                                    <div class="fieldWrapper mb-2">
-                                        <p class="mb-2">
-                                            {{ field.label_tag }}
-                                        </p>
-                                        {{ field }}
+                                <div class="mb-2">
+                                    <button type='button' class="expand-button" data-toggle="collapse" data-target="#author_dropdown_{{ forloop.counter0 }}"
+                                            onclick="toggleAuthorForm('author_dropdown_icon_{{ forloop.counter0 }}')">
+                                        <i id="author_dropdown_icon_{{ forloop.counter0 }}" class="typcn typcn-arrow-sorted-down"></i>
+                                    </button>
+                                    <span>Author {{ forloop.counter }}</span>
+                                </div>
+                                <div class="collapse" id="author_dropdown_{{ forloop.counter0 }}" expanded="false" aria-expanded="false">
+                                    <button onclick="removeAuthor({{ forloop.counter0 }})" class="btn btn-outline-primary mb-0" type="button">Remove Author</button>
+                                    {% for field in author_form.visible_fields|slice:"0:2" %}
+                                        <div class="fieldWrapper mb-2">
+                                            <p class="mb-0">
+                                                {{ field.label_tag }}
+                                            </p>
+                                            {{ field }}
+                                            <p class="mb-0">
+                                                {{ field.errors }}
+                                            </p>
+                                        </div>
+                                    {% endfor %}
+                                    <div class="fieldWrapper mb-0 input-width-auto">
+                                        {{ author_form.corresponding.label_tag }}
+                                        {{ author_form.corresponding }}
                                         <p>
-                                            {{ field.errors }}
+                                            {{ author_form.corresponding.errors }}
                                         </p>
                                     </div>
-                                {% endfor %}
-                                <div class="fieldWrapper mb-2 input-width-auto">
-                                    {{ author_form.corresponding.label_tag }}
-                                    {{ author_form.corresponding }}
-                                    <p>
-                                        {{ author_form.corresponding.errors }}
-                                    </p>
                                 </div>
                             </div>
                         {% endfor %}
@@ -108,32 +117,41 @@
     </div>
 
     <div id="empty_form" style="display:none">
-        <div id="author_form_" class="author-form-wrapper">
-            <button onclick="removeAuthor()" class="btn btn-outline-primary mb-4" type="button">Remove Author</button>
-            <div class="fieldWrapper mb-2">
-                <p class="mb-2">
-                    {{ author_form_set.empty_form.name.label_tag }}
-                </p>
-                <input onchange="updateTextValue(this)" type="text" name="form-__prefix__-name" maxlength="1000" id="id_form-__prefix__-name" required="">
-                <p>
-                    {{ author_form_set.empty_form.name.errors }}
-                </p>
+        <div id="author_form___prefix__" class="author-form-wrapper">
+            <div class="mb-2">
+                <button type='button' class="expand-button" data-toggle="collapse" data-target="#author_dropdown___prefix__"
+                        onclick="toggleAuthorForm('author_dropdown_icon___prefix__')">
+                    <i id="author_dropdown_icon___prefix__" class="typcn typcn-arrow-sorted-down"></i>
+                </button>
+                <span>Author __prefix1__</span>
             </div>
-            <div class="fieldWrapper mb-2">
-                <p class="mb-2">
-                    {{ author_form_set.empty_form.email.label_tag }}
-                </p>
-                {{ author_form_set.empty_form.email }}
-                <p>
-                    {{ author_form_set.empty_form.email.errors }}
-                </p>
-            </div>
-            <div class="fieldWrapper mb-2 input-width-auto">
-                {{ author_form_set.empty_form.corresponding.label_tag }}
-                {{ author_form_set.empty_form.corresponding }}
-                <p>
-                    {{ author_form_set.empty_form.corresponding.errors }}
-                </p>
+            <div class="collapse" id="author_dropdown___prefix__" expanded="true" aria-expanded="true">
+                <button type='button' onclick="removeAuthor(__prefix__)" class="btn btn-outline-primary mb-0" type="button">Remove Author</button>
+                <div class="fieldWrapper mb-2">
+                    <p class="mb-0">
+                        {{ author_form_set.empty_form.name.label_tag }}
+                    </p>
+                    <input onchange="updateTextValue(this)" type="text" name="form-__prefix__-name" maxlength="1000" id="id_form-__prefix__-name" required="">
+                    <p class="mb-0">
+                        {{ author_form_set.empty_form.name.errors }}
+                    </p>
+                </div>
+                <div class="fieldWrapper mb-2">
+                    <p class="mb-0">
+                        {{ author_form_set.empty_form.email.label_tag }}
+                    </p>
+                    {{ author_form_set.empty_form.email }}
+                    <p class="mb-0">
+                        {{ author_form_set.empty_form.email.errors }}
+                    </p>
+                </div>
+                <div class="fieldWrapper mb-0 input-width-auto">
+                    {{ author_form_set.empty_form.corresponding.label_tag }}
+                    {{ author_form_set.empty_form.corresponding }}
+                    <p class="mb-0">
+                        {{ author_form_set.empty_form.corresponding.errors }}
+                    </p>
+                </div>
             </div>
         </div>
     </div>

@@ -27,7 +27,7 @@
         {% for publication in publications %}
             <div class="mt-4">
                 <p class="m-0 p-0">
-                    <button data-toggle="collapse" data-target="#pub_dropdown_{{ publication.pub.id }}" onclick="togglePub('pub_dropdown_icon_{{ publication.pub.id }}')">
+                    <button type='button' data-toggle="collapse" data-target="#pub_dropdown_{{ publication.pub.id }}" onclick="togglePub('pub_dropdown_icon_{{ publication.pub.id }}')">
                         <i id="pub_dropdown_icon_{{ publication.pub.id }}" class="typcn typcn-arrow-sorted-down"></i>
                     </button>
                      {{publication.citation|safe}}

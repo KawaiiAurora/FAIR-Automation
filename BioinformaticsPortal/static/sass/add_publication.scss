@@ -39,7 +39,7 @@ input[type='submit']{
 .author-form-wrapper{
   border: solid grey 1px;
   border-radius: 10px;
-  padding: 20px 20px 0 20px;
+  padding: 10px 20px 0 20px;
   margin: 0 0 20px 0;
   width: 70%;
 }
@@ -52,3 +52,12 @@ input[type='submit']{
   background: none !important;
 }
 
+.expand-button{
+	border: none;
+	padding: 0;
+	background-color: transparent;
+}
+
+.expand-button:focus{
+	outline: none;
+}

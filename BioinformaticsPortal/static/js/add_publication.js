@@ -1,3 +1,8 @@
+window.onload = function() {
+    let author_forms = $(`[id^=author_form_]`);
+    document.getElementById('id_form-TOTAL_FORMS').value = author_forms.length-2;
+}
+
 function updateTypeName(select){
     let text = ['Journal Name', 'Conference Name']
     $('label[for="id_typeName"]').html(text[select.selectedIndex])
@@ -5,10 +10,7 @@ function updateTypeName(select){
 
 function addNewAuthor(){
     let form_idx = $('#id_form-TOTAL_FORMS').val();
-	$('#author_form_set').append($('#empty_form').html().
-    replace(/__prefix__/g, form_idx).
-    replace('id="author_form_"',`id="author_form_${form_idx}"`).
-    replace('onclick="removeAuthor()"',`onclick="removeAuthor(${form_idx})"`));
+	$('#author_form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx).replace(/__prefix1__/g, parseInt(form_idx)+1))
 	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
 }
 
@@ -16,10 +18,7 @@ function addExistingAuthor(){
     let form_idx = $('#id_form-TOTAL_FORMS').val();
     let select_element = $('#existing-author-select')[0];
     let select_content = JSON.parse(select_element.value);
-	$('#author_form_set').append($('#empty_form').html().
-    replace(/__prefix__/g, form_idx).
-    replace('id="author_form_"',`id="author_form_${form_idx}"`).
-    replace('onclick="removeAuthor()"',`onclick="removeAuthor(${form_idx})"`));
+	$('#author_form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx).replace(/__prefix1__/g, parseInt(form_idx)+1))
 	$(`#id_form-${form_idx}-name`)[0].value = select_content.name;
 	$(`#id_form-${form_idx}-email`)[0].value = select_content.email;
 	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
@@ -53,4 +52,10 @@ function updateCorresponding(checkBox){
 
 function updateTextValue(textInput){
     textInput.setAttribute('value',textInput.value)
+}
+
+function toggleAuthorForm(iconId){
+    let icon = document.getElementById(iconId);
+    icon.classList.toggle("typcn-arrow-sorted-down");
+    icon.classList.toggle("typcn-arrow-sorted-up");
 }

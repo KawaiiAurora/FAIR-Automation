@@ -16,7 +16,7 @@ from .forms import PublicationForm, AuthorForm
 def full_authors(publication):
     authors = list(publication.authors.all())
     for author in authors:
-        author.corresponding = PublicationAssociatedAuthor.objects.get(author_id=author.id).correspondingAuthor
+        author.corresponding = PublicationAssociatedAuthor.objects.filter(author_id=author.id).first().correspondingAuthor
     print(authors)
 
     return authors
@@ -85,7 +85,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
         for author in authors:
             result.append({
                 'name': author.name,
-                'email': author.email,
+                'email': (author.email or ''),
                 'corresponding': author.corresponding
             })
         return result
@@ -160,7 +160,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
             author_form_set = author_form_set(initial=form_set_authors)
         else:
             form = PublicationForm()
-            author_form_set = formset_factory(AuthorForm, extra=1)
+            author_form_set = formset_factory(AuthorForm, extra=0)
             author_form_set = author_form_set(initial=[])
 
         for author_form in author_form_set:
