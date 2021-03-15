@@ -103,7 +103,7 @@
                 <p class="mb-2">
                     {{ author_form_set.empty_form.name.label_tag }}
                 </p>
-                <input type="text" name="form-__prefix__-name" maxlength="1000" id="id_form-__prefix__-name" required="">
+                <input onchange="updateTextValue(this)" type="text" name="form-__prefix__-name" maxlength="1000" id="id_form-__prefix__-name" required="">
                 <p>
                     {{ author_form_set.empty_form.name.errors }}
                 </p>

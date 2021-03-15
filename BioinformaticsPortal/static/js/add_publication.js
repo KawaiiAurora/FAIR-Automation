@@ -16,6 +16,7 @@ function removeAuthor(val){
     let author_forms = $(`[id^=author_form_]`); //get author forms
     delete author_forms[0] //remove first item (wrapper)
     delete author_forms[author_forms.length-1] //remove last item (empty form)
+    console.log(author_forms)
     author_forms = Object.values(author_forms).slice(0,author_forms.length-2); //getting only relevant values
     for(let x = 0; x < author_forms.length; x++){
         author_forms[x].id = `author_form_${x}`;
@@ -28,7 +29,12 @@ function removeAuthor(val){
 }
 
 function updateCorresponding(checkBox){
+    checkBox.toggleAttribute('checked')
     let form_num = checkBox.id.replace("id_form-","").replace("-corresponding","");
     $(`#id_form-${form_num}-email`)[0].toggleAttribute("required")
     $(`label[for='id_form-${form_num}-email'`).toggleClass("required_label")
+}
+
+function updateTextValue(textInput){
+    textInput.setAttribute('value',textInput.value)
 }

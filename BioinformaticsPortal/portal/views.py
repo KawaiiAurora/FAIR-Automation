@@ -21,6 +21,7 @@ def full_authors(publication):
 
     return authors
 
+
 def index(request):
     return render(request, 'portal/index.html', {
         'view_name': 'Home'
@@ -87,7 +88,6 @@ def add_publication(request, is_edit=False, pub_obj=None):
                 'email': author.email,
                 'corresponding': author.corresponding
             })
-        print(len(result))
         return result
 
     if request.method == "POST":
@@ -160,17 +160,21 @@ def add_publication(request, is_edit=False, pub_obj=None):
             author_form_set = author_form_set(initial=form_set_authors)
         else:
             form = PublicationForm()
-            author_form_set = formset_factory(AuthorForm)
+            author_form_set = formset_factory(AuthorForm, extra=1)
+            author_form_set = author_form_set(initial=[])
 
         for author_form in author_form_set:
             author_form.use_required_attribute = True
             author_form.empty_permitted = False
+            if author_form['corresponding'].value():
+                author_form.fields['email'].required = True
 
     context = {
         'form': form,
         'author_form_set': author_form_set,
         'is_edit': is_edit
     }
+
     return render(request, 'portal/publications/add.html', context)
 
 

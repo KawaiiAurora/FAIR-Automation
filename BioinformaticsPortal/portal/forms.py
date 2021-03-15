@@ -1,6 +1,7 @@
 from django import forms
 import datetime
 
+from django.core.exceptions import ValidationError
 from django.forms import Widget
 
 
@@ -22,11 +23,21 @@ class PublicationForm(forms.Form):
 
 class AuthorForm(forms.Form):
     required_css_class = 'required_label'
-    name = forms.CharField(max_length=1000, label="Author Name", required=True, label_suffix='')
-    email = forms.EmailField(label="Author Email", required=False, label_suffix='')
+    name = forms.CharField(widget=forms.TextInput(attrs={'onchange': 'updateTextValue(this)'}),
+                           max_length=1000, label="Author Name", required=True, label_suffix='')
+    email = forms.EmailField(widget=forms.TextInput(attrs={'onchange': 'updateTextValue(this)'}),
+                             label="Author Email", required=False, label_suffix='')
     corresponding = forms.BooleanField(initial=False,
                                        widget=forms.CheckboxInput(attrs={'onclick': 'updateCorresponding(this)'})
                                        ,
                                        label="Corresponding Author:",
                                        required=False,
                                        label_suffix='')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        corresponding = cleaned_data.get("corresponding")
+        if corresponding and email == "":
+            self.add_error("email",
+                           ValidationError("Corresponding authors must have an e-mail address associated with them"))
