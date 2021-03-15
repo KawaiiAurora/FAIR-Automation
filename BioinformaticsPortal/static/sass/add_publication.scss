@@ -32,6 +32,10 @@ input[type='submit']{
   border-radius: 10px;
 }
 
+.author-outer-wrapper-info{
+  padding-right: 20px;
+}
+
 .author-form-wrapper{
   border: solid grey 1px;
   border-radius: 10px;
@@ -42,5 +46,9 @@ input[type='submit']{
 
 .errorlist{
   color: red;
+}
+
+.background-none{
+  background: none !important;
 }
 

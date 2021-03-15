@@ -171,6 +171,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
 
     context = {
         'form': form,
+        'all_authors': PublicationAuthor.objects.all(),
         'author_form_set': author_form_set,
         'is_edit': is_edit
     }

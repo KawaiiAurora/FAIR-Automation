@@ -8,10 +8,12 @@
     <head>
         {% compress css %}
             <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/add_publication.scss' %}">
+            <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/bootstrap-combobox.scss' %}">
         {% endcompress %}
 
         {% compress js %}
             <script src="{% static 'js/add_publication.js' %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static 'js/bootstrap-combobox.js' %}" type="text/javascript" charset="utf-8"></script>
         {% endcompress %}
     </head>
 
@@ -36,12 +38,21 @@
                     <p>Authors</p>
                     {{ author_form_set.management_form }}
                     <div class="author-outer-wrapper" id="author_form_set">
-                        <p>
+                        <p class="author-outer-wrapper-info">
                             First and middle names of authors should be abbreviated to a single letter.
                             <br/>
                             Corresponding authors must have an e-mail address.
                         </p>
-                        <button onclick="addAuthor()" class="btn btn-outline-primary mb-4" type="button">Add Author</button>
+                        <div class="d-flex mr-2 mb-4">
+                            <select id='existing-author-select' class='custom-select combobox background-none'>
+                                <option></option>
+                                {% for author in all_authors %}
+                                    <option value='{"name":"{{ author.name }}","email": "{{ author.email }}"}'>{{ author.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button onclick="addExistingAuthor()" class="btn btn-outline-primary ml-2" type="button">Add Existing Author</button>
+                        </div>
+                        <button onclick="addNewAuthor()" class="btn btn-outline-primary mb-4" type="button">Add New Author</button>
                         {% for author_form in author_form_set %}
                             <div id="author_form_{{ forloop.counter0 }}" class="author-form-wrapper">
                                 {% if forloop.counter0 != 0 %}
@@ -128,4 +139,9 @@
     </div>
 
     <script>updateTypeName(document.getElementById("id_pubType"))</script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('.combobox').combobox();
+      });
+    </script>
 {% endblock %}
