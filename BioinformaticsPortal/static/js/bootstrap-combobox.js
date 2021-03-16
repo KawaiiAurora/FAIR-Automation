@@ -119,10 +119,12 @@
   }
 
   , select: function () {
-      var val = this.$menu.find('.active').attr('data-value');
+      let val = this.$menu.find('.active').attr('data-value');
       this.$element.val(this.updater(val)).trigger('change');
       this.$target.val(this.map[val]).trigger('change');
       this.$source.val(this.map[val]).trigger('change');
+      console.log(this.$target);
+      console.log(this.$source);
       this.$container.addClass('combobox-selected');
       this.selected = true;
       return this.hide();
@@ -411,14 +413,44 @@
           break;
 
         default:
-          this.clearTarget();
-          this.lookup();
+          this.updateSelection()
+
       }
 
       e.stopPropagation();
       e.preventDefault();
   }
+  , updateSelection: function(e){
+        let that = this;
+        $.ajax({
+            url: '/portal/publications/author_suggestions/',
+            data: {
+              'author_name': this.$element.val()
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data.author_suggestions) {
+                that.$source.empty();
+                that.source = [];
+                that.map = {};
+                let source_html = "<option></option>";
+                data.author_suggestions.forEach(
+                    (author) => {
+                        source_html += `<option value='{"name":"${author.name}","surname":"${author.surname}","email":"${author.email}"}'>${author.name} ${author.surname}</option>`
+                        that.source.push(`${author.name} ${author.surname}`);
+                        that.map[`${author.name} ${author.surname}`] = `{"name":"${author.name}","surname":"${author.surname}","email":"${author.email}"}`;
+                    }
+                )
+                  console.log(source_html);
+                  that.$source.html(source_html);
+                  that.clearTarget();
+                  that.lookup();
+              }
 
+            }
+        });
+
+    }
   , focus: function (e) {
       this.focused = true;
     }
@@ -468,7 +500,7 @@
 
   $.fn.combobox.defaults = {
     bsVersion: '4'
-  , menu: '<ul class="typeahead typeahead-long dropdown-menu"></ul>'
+  , menu: '<ul class="w-100 typeahead typeahead-long dropdown-menu"></ul>'
   , item: '<li><a href="#" class="dropdown-item"></a></li>'
   , iconCaret: undefined
   , iconRemove: undefined

@@ -9,6 +9,7 @@ urlpatterns = [
     path('portal/publications/<int:current_page>', views.publications, name="publications"),
     path('portal/publications/add', views.add_publication, name="add_publication"),
     path('portal/publications/edit/<int:pub_id>', views.edit_publication, name="edit_publication"),
+    path('portal/publications/author_suggestions/', views.author_suggestions, name="author_suggestions"),
     path('portal/tools/', views.tools, name="tools"),
     path('portal/tools/details/<int:id>', views.details, name="details"),
     path('portal/tools/add/<int:id>', views.add, name="add"),

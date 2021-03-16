@@ -17,6 +17,7 @@ function addNewAuthor(){
 function addExistingAuthor(){
     let form_idx = $('#id_form-TOTAL_FORMS').val();
     let select_element = $('#existing-author-select')[0];
+    console.log(select_element);
     let select_content = JSON.parse(select_element.value);
 	$('#author_form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx).replace(/__prefix1__/g, parseInt(form_idx)+1))
 	$(`#id_form-${form_idx}-name`)[0].value = select_content.name;

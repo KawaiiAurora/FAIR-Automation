@@ -1,4 +1,5 @@
-from django.http import HttpResponseRedirect
+from django.db.models import Q
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from portal.models import FairScore, Tool, Findability, Accessibility, Interoperability, Reusability, Pipeline, \
@@ -16,7 +17,8 @@ from .forms import PublicationForm, AuthorForm
 def full_authors(publication):
     authors = list(publication.authors.all())
     for author in authors:
-        author.corresponding = PublicationAssociatedAuthor.objects.filter(author_id=author.id).first().correspondingAuthor
+        author.corresponding = PublicationAssociatedAuthor.objects.filter(
+            author_id=author.id).first().correspondingAuthor
 
     return authors
 
@@ -189,6 +191,26 @@ def add_publication(request, is_edit=False, pub_obj=None):
     }
 
     return render(request, 'portal/publications/add.html', context)
+
+
+def author_suggestions(request):
+    def queryset_to_objs(authors):
+        result = []
+        for pub_author in authors:
+            result.append({
+                'name': pub_author.name,
+                'surname': pub_author.surname,
+                'email': (pub_author.email or ''),
+                'corresponding': pub_author.corresponding
+            })
+        return result
+
+    author_name = request.GET.get('author_name', None)
+    data = {
+        'author_suggestions': list(PublicationAuthor.objects.filter(
+            Q(name__icontains=author_name) | Q(surname__icontains=author_name))[0:10].values())
+    }
+    return JsonResponse(data)
 
 
 def edit_publication(request, pub_id):
