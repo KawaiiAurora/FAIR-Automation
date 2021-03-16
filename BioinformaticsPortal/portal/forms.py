@@ -1,6 +1,6 @@
 from django import forms
 import datetime
-
+from portal.models import PublicationAuthor
 from django.core.exceptions import ValidationError
 from django.forms import Widget
 
@@ -24,11 +24,13 @@ class PublicationForm(forms.Form):
 class AuthorForm(forms.Form):
     required_css_class = 'required_label'
     name = forms.CharField(widget=forms.TextInput(attrs={'onchange': 'updateTextValue(this)'}),
-                           max_length=1000, label="Author Name", required=True, label_suffix='')
+                           max_length=255, label="Author Name", required=True, label_suffix='')
+    surname = forms.CharField(widget=forms.TextInput(attrs={'onchange': 'updateTextValue(this)'}),
+                              max_length=255, label="Author Surname", required=True, label_suffix='')
     email = forms.EmailField(widget=forms.TextInput(attrs={'onchange': 'updateTextValue(this)'}),
-                             label="Author Email", required=False, label_suffix='')
+                             label="Author Email", required=True, label_suffix='')
     corresponding = forms.BooleanField(initial=False,
-                                       widget=forms.CheckboxInput(attrs={'onclick': 'updateCorresponding(this)'})
+                                       widget=forms.CheckboxInput(attrs={'class': 'w-auto'})
                                        ,
                                        label="Corresponding Author:",
                                        required=False,
@@ -37,7 +39,11 @@ class AuthorForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
-        corresponding = cleaned_data.get("corresponding")
-        if corresponding and (email == "" or email is None):
-            self.add_error("email",
-                           ValidationError("Corresponding authors must have an e-mail address associated with them"))
+        name = cleaned_data.get("name")
+        surname = cleaned_data.get("surname")
+        author = PublicationAuthor.objects.filter(email=email).first()
+        if author is not None:
+            if author.name != name or author.surname != surname:
+                self.add_error("email",
+                               ValidationError("An author with the same e-mail address but different "
+                                               "details already exists!"))

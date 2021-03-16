@@ -1,8 +1,10 @@
 from django.urls import path
+from django.shortcuts import redirect
 
 from . import views
 
 urlpatterns = [
+    path('', lambda req: redirect('/portal/home/')),
     path('portal/home/', views.index, name="home"),
     path('portal/publications/<int:current_page>', views.publications, name="publications"),
     path('portal/publications/add', views.add_publication, name="add_publication"),

@@ -9,6 +9,10 @@ input[type='submit']{
   width: auto !important;
 }
 
+.error-notification{
+  color: red;
+}
+
 .required_label::after {
   content: ' *';
   color: red;

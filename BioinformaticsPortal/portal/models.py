@@ -79,8 +79,9 @@ class PipelineTools(models.Model):
 
 
 class PublicationAuthor(models.Model):
-    name = models.CharField(max_length=1000, blank=False, null=False)
-    email = models.EmailField(blank=True, null=True)
+    name = models.CharField(max_length=255, blank=False, null=False)
+    surname = models.CharField(max_length=255, blank=False, null=False)
+    email = models.EmailField(blank=False, null=False, unique=True)
 
 
 class Publication(models.Model):

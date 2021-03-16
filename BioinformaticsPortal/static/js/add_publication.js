@@ -20,6 +20,7 @@ function addExistingAuthor(){
     let select_content = JSON.parse(select_element.value);
 	$('#author_form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx).replace(/__prefix1__/g, parseInt(form_idx)+1))
 	$(`#id_form-${form_idx}-name`)[0].value = select_content.name;
+	$(`#id_form-${form_idx}-surname`)[0].value = select_content.surname;
 	$(`#id_form-${form_idx}-email`)[0].value = select_content.email;
 	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
 }
@@ -41,13 +42,6 @@ function removeAuthor(val){
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/name="form-\d*/gm,`name="form-${x}`);
     }
     $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) - 1);
-}
-
-function updateCorresponding(checkBox){
-    checkBox.toggleAttribute('checked')
-    let form_num = checkBox.id.replace("id_form-","").replace("-corresponding","");
-    $(`#id_form-${form_num}-email`)[0].toggleAttribute("required")
-    $(`label[for='id_form-${form_num}-email'`).toggleClass("required_label")
 }
 
 function updateTextValue(textInput){

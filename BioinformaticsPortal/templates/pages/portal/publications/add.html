@@ -20,7 +20,12 @@
     <div class="container">
         <div class="d-flex flex-column mb-4">
             <h3>{% if is_edit %}Edit{% else %}Add{% endif %} Publication</h3>
-            <p class="mt-4">Please {% if is_edit %}modify{% else %}fill in{% endif %} the form below to {% if is_edit %}edit the{% else %}add a{% endif %} publication</p>
+            <p class="mt-1 mb-0">Please {% if is_edit %}modify{% else %}fill in{% endif %} the form below to {% if is_edit %}edit the{% else %}add a{% endif %} publication</p>
+            {% if errors.form_has_errors %}
+                <p class="mt-2 mb-0 text-center error-notification">
+                    The submitted form has errors. Please correct them as per the provided instructions.
+                </p>
+            {% endif %}
         </div>
         <div class="mb-4">
             <form method=POST>
@@ -38,18 +43,14 @@
                     <p>Authors</p>
                     {{ author_form_set.management_form }}
                     <div class="author-outer-wrapper" id="author_form_set">
-                        <p class="author-outer-wrapper-info">
-                            First and middle names of authors should be abbreviated to a single letter.
-                            <br/>
-                            Corresponding authors must have an e-mail address.
-                            <br/>
-                            At least one author must be added.
+                        <p class="author-outer-wrapper-info {% if errors.no_authors %} error-notification {% endif %}">
+                            A publication must have at least one author
                         </p>
                         <div class="d-flex mr-2 mb-4">
                             <select id='existing-author-select' class='custom-select combobox background-none'>
                                 <option></option>
                                 {% for author in all_authors %}
-                                    <option value='{"name":"{{ author.name }}","email": "{{ author.email }}"}'>{{ author.name }}</option>
+                                    <option value='{"name":"{{ author.name }}","surname": "{{ author.surname }}","email": "{{ author.email }}"}'>{{ author.name }} {{ author.surname }}</option>
                                 {% endfor %}
                             </select>
                             <button onclick="addExistingAuthor()" class="btn btn-outline-primary ml-2" type="button">Add Existing Author</button>
@@ -62,11 +63,11 @@
                                             onclick="toggleAuthorForm('author_dropdown_icon_{{ forloop.counter0 }}')">
                                         <i id="author_dropdown_icon_{{ forloop.counter0 }}" class="typcn typcn-arrow-sorted-down"></i>
                                     </button>
-                                    <span>Author {{ forloop.counter }}</span>
+                                    <span>Author {{ forloop.counter }} {% if author_form.errors|length > 0 %} <span class="error-notification">(Has Errors)</span> {% endif %}</span>
                                 </div>
                                 <div class="collapse" id="author_dropdown_{{ forloop.counter0 }}" expanded="false" aria-expanded="false">
                                     <button onclick="removeAuthor({{ forloop.counter0 }})" class="btn btn-outline-primary mb-0" type="button">Remove Author</button>
-                                    {% for field in author_form.visible_fields|slice:"0:2" %}
+                                    {% for field in author_form.visible_fields|slice:"0:3" %}
                                         <div class="fieldWrapper mb-2">
                                             <p class="mb-0">
                                                 {{ field.label_tag }}
@@ -77,7 +78,7 @@
                                             </p>
                                         </div>
                                     {% endfor %}
-                                    <div class="fieldWrapper mb-0 input-width-auto">
+                                    <div class="fieldWrapper mb-0">
                                         {{ author_form.corresponding.label_tag }}
                                         {{ author_form.corresponding }}
                                         <p>
@@ -127,25 +128,18 @@
             </div>
             <div class="collapse" id="author_dropdown___prefix__" expanded="true" aria-expanded="true">
                 <button type='button' onclick="removeAuthor(__prefix__)" class="btn btn-outline-primary mb-0" type="button">Remove Author</button>
-                <div class="fieldWrapper mb-2">
-                    <p class="mb-0">
-                        {{ author_form_set.empty_form.name.label_tag }}
-                    </p>
-                    <input onchange="updateTextValue(this)" type="text" name="form-__prefix__-name" maxlength="1000" id="id_form-__prefix__-name" required="">
-                    <p class="mb-0">
-                        {{ author_form_set.empty_form.name.errors }}
-                    </p>
-                </div>
-                <div class="fieldWrapper mb-2">
-                    <p class="mb-0">
-                        {{ author_form_set.empty_form.email.label_tag }}
-                    </p>
-                    {{ author_form_set.empty_form.email }}
-                    <p class="mb-0">
-                        {{ author_form_set.empty_form.email.errors }}
-                    </p>
-                </div>
-                <div class="fieldWrapper mb-0 input-width-auto">
+                {% for field in author_form_set.empty_form.visible_fields|slice:"0:3" %}
+                    <div class="fieldWrapper mb-2">
+                        <p class="mb-0">
+                            {{ field.label_tag }}
+                        </p>
+                        {{ field }}
+                        <p class="mb-0">
+                            {{ field.errors }}
+                        </p>
+                    </div>
+                {% endfor %}
+                <div class="fieldWrapper mb-0">
                     {{ author_form_set.empty_form.corresponding.label_tag }}
                     {{ author_form_set.empty_form.corresponding }}
                     <p class="mb-0">

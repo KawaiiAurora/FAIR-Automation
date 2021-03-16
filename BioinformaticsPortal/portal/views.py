@@ -17,7 +17,6 @@ def full_authors(publication):
     authors = list(publication.authors.all())
     for author in authors:
         author.corresponding = PublicationAssociatedAuthor.objects.filter(author_id=author.id).first().correspondingAuthor
-    print(authors)
 
     return authors
 
@@ -33,10 +32,11 @@ def publications(request, current_page):
         authors = list(publication.authors.all())
         author_string = ""
         for author in authors:
+            print(author.surname)
             if authors.index(author) == len(authors) - 1 and len(authors) != 1:
-                author_string += f' and {author.name},'
+                author_string += f' and {author.name} {author.surname},'
             else:
-                author_string += f' {author.name},'
+                author_string += f' {author.name} {author.surname},'
 
         if publication.journal is not None:
             return f'{author_string} "<a href={publication.url}>{publication.title},</a>" <em>{publication.journal}</em>, {publication.year}.'
@@ -82,19 +82,23 @@ def publications(request, current_page):
 def add_publication(request, is_edit=False, pub_obj=None):
     def author_to_formset(authors):
         result = []
-        for author in authors:
+        for pub_author in authors:
             result.append({
-                'name': author.name,
-                'email': (author.email or ''),
-                'corresponding': author.corresponding
+                'name': pub_author.name,
+                'surname': pub_author.surname,
+                'email': (pub_author.email or ''),
+                'corresponding': pub_author.corresponding
             })
         return result
+
+    errors = {}
 
     if request.method == "POST":
         form = PublicationForm(request.POST)
         author_form_set = formset_factory(AuthorForm)
         author_form_set = author_form_set(request.POST)
-        if form.is_valid() and author_form_set.is_valid():
+        print(author_form_set.is_valid())
+        if form.is_valid() and author_form_set.is_valid() and len(author_form_set) > 0:
             title = form.cleaned_data['title']
             url = form.cleaned_data['url']
             pub_type = form.cleaned_data['pubType']
@@ -111,6 +115,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
                 'abstract': abstract,
                 'hidden': hidden
             }
+
             if is_edit:
                 pub_obj.title = title
                 pub_obj.url = url
@@ -129,12 +134,13 @@ def add_publication(request, is_edit=False, pub_obj=None):
             for author_form in author_form_set:
                 if author_form.is_valid():
                     name = author_form.cleaned_data['name']
+                    surname = author_form.cleaned_data['surname']
                     email = author_form.cleaned_data['email']
                     corresponding = author_form.cleaned_data['corresponding']
                     # look up existing author
-                    author = PublicationAuthor.objects.filter(name=name, email=email).first()
+                    author = PublicationAuthor.objects.filter(email=email).first()
                     if author is None:
-                        author = PublicationAuthor(name=name, email=email)
+                        author = PublicationAuthor(name=name, surname=surname, email=email)
                         author.save()
 
                     assoc_pub = pub_obj if is_edit else new_pub
@@ -143,6 +149,11 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                                                correspondingAuthor=corresponding)
 
             return HttpResponseRedirect('/portal/publications/1')
+        else:
+            errors = {
+                'form_has_errors': True,
+                'no_authors': len(author_form_set) == 0
+            }
     else:
         if is_edit:
             form = PublicationForm(initial={'title': pub_obj.title,
@@ -156,7 +167,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
                                             'hidden': pub_obj.hidden
                                             })
             form_set_authors = author_to_formset(full_authors(pub_obj))
-            author_form_set = formset_factory(AuthorForm, extra=(1 if len(form_set_authors) == 0 else 0))
+            author_form_set = formset_factory(AuthorForm, extra=0)
             author_form_set = author_form_set(initial=form_set_authors)
         else:
             form = PublicationForm()
@@ -171,6 +182,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
 
     context = {
         'form': form,
+        'errors': errors,
         'all_authors': PublicationAuthor.objects.all(),
         'author_form_set': author_form_set,
         'is_edit': is_edit
