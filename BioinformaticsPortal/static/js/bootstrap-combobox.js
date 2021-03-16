@@ -123,8 +123,6 @@
       this.$element.val(this.updater(val)).trigger('change');
       this.$target.val(this.map[val]).trigger('change');
       this.$source.val(this.map[val]).trigger('change');
-      console.log(this.$target);
-      console.log(this.$source);
       this.$container.addClass('combobox-selected');
       this.selected = true;
       return this.hide();
@@ -441,7 +439,6 @@
                         that.map[`${author.name} ${author.surname}`] = `{"name":"${author.name}","surname":"${author.surname}","email":"${author.email}"}`;
                     }
                 )
-                  console.log(source_html);
                   that.$source.html(source_html);
                   that.clearTarget();
                   that.lookup();

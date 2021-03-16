@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
@@ -194,21 +195,11 @@ def add_publication(request, is_edit=False, pub_obj=None):
 
 
 def author_suggestions(request):
-    def queryset_to_objs(authors):
-        result = []
-        for pub_author in authors:
-            result.append({
-                'name': pub_author.name,
-                'surname': pub_author.surname,
-                'email': (pub_author.email or ''),
-                'corresponding': pub_author.corresponding
-            })
-        return result
-
     author_name = request.GET.get('author_name', None)
     data = {
-        'author_suggestions': list(PublicationAuthor.objects.filter(
-            Q(name__icontains=author_name) | Q(surname__icontains=author_name))[0:10].values())
+        'author_suggestions': list(PublicationAuthor.objects
+            .annotate(screen_name=Concat('name', Value(' '), 'surname'))
+            .filter(screen_name__icontains=author_name)[0:10].values())
     }
     return JsonResponse(data)
 
