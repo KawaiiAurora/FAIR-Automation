@@ -180,8 +180,6 @@ def add_publication(request, is_edit=False, pub_obj=None):
         for author_form in author_form_set:
             author_form.use_required_attribute = True
             author_form.empty_permitted = False
-            if author_form['corresponding'].value():
-                author_form.fields['email'].required = True
 
     context = {
         'form': form,
