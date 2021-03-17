@@ -43,8 +43,8 @@
                     <p>Authors</p>
                     {{ author_form_set.management_form }}
                     <div class="author-outer-wrapper" id="author_form_set">
-                        <p class="author-outer-wrapper-info {% if errors.no_authors %} error-notification {% endif %}">
-                            A publication must have at least one author
+                        <p class="author-outer-wrapper-info {% if errors.no_corresponding_author %} error-notification {% endif %}">
+                            A publication must have at least one author with at least one being corresponding
                         </p>
                         <div class="d-flex mr-2 mb-4">
                             <select id='existing-author-select' class='custom-select combobox background-none'>

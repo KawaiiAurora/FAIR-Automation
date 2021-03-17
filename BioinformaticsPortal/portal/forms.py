@@ -41,6 +41,8 @@ class AuthorForm(forms.Form):
         email = cleaned_data.get("email")
         name = cleaned_data.get("name")
         surname = cleaned_data.get("surname")
+        # If one inputs an existing author, checks that all the e-mail address given is associated with the proper
+        # name/surname
         author = PublicationAuthor.objects.filter(email=email).first()
         if author is not None:
             if author.name != name or author.surname != surname:

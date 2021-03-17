@@ -44,7 +44,7 @@ def publications(request, current_page):
         if publication.journal is not None:
             return f'{author_string} "<a href={publication.url}>{publication.title},</a>" <em>{publication.journal}</em>, {publication.year}.'
         elif publication.conference is not None:
-            return f'{author_string} "<a href={publication.url}>{publication.title},</a>" presented at the {publication.conference}, {publication.year}'
+            return f'{author_string} "<a href={publication.url}>{publication.title},</a>" presented at the {publication.conference}, {publication.year} '
         else:
             return f'{author_string}, "{publication.title},", {publication.year}.'
 
@@ -94,14 +94,32 @@ def add_publication(request, is_edit=False, pub_obj=None):
             })
         return result
 
+    def look_for_corresponding(formset):
+        result = False
+        print("Corresponding Result: " + str(result))
+        for author_form in author_form_set:
+            if author_form.cleaned_data['corresponding']:
+                result = True
+                return result
+        return result
+
+    def author_form_validation(formset):
+        is_valid = author_form_set.is_valid() and len(author_form_set) > 0
+        print("Basic isValid: "+str(is_valid))
+        corresponding_author_check = False
+        if is_valid:
+            corresponding_author_check = look_for_corresponding(formset)
+        return is_valid, corresponding_author_check
+
     errors = {}
 
     if request.method == "POST":
         form = PublicationForm(request.POST)
         author_form_set = formset_factory(AuthorForm)
         author_form_set = author_form_set(request.POST)
-        print(author_form_set.is_valid())
-        if form.is_valid() and author_form_set.is_valid() and len(author_form_set) > 0:
+        main_form_valid = form.is_valid()
+        author_formset_valid, corresponding_author_check = author_form_validation(author_form_set)
+        if main_form_valid and author_formset_valid and corresponding_author_check:
             title = form.cleaned_data['title']
             url = form.cleaned_data['url']
             pub_type = form.cleaned_data['pubType']
@@ -155,7 +173,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
         else:
             errors = {
                 'form_has_errors': True,
-                'no_authors': len(author_form_set) == 0
+                'no_corresponding_author': not corresponding_author_check
             }
     else:
         if is_edit:
@@ -196,8 +214,8 @@ def author_suggestions(request):
     author_name = request.GET.get('author_name', None)
     data = {
         'author_suggestions': list(PublicationAuthor.objects
-            .annotate(screen_name=Concat('name', Value(' '), 'surname'))
-            .filter(screen_name__icontains=author_name)[0:10].values())
+                                   .annotate(screen_name=Concat('name', Value(' '), 'surname'))
+                                   .filter(screen_name__icontains=author_name)[0:10].values())
     }
     return JsonResponse(data)
 
