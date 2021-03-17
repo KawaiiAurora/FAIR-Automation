@@ -1,9 +1,10 @@
-input, textarea, select{
+input:not([type='submit']), textarea, select{
   padding: 10px 15px;
   width: 100%;
   max-width: 700px;
   border: 1px solid black !important;
   border-radius: 0px !important;
+  color: black !important;
 }
 
 input[type='submit']{

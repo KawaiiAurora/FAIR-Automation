@@ -108,9 +108,7 @@
                         {{ form.hidden.errors }}
                     </p>
                 </div>
-
-                <br>
-                <br>
+            
                 <input class="btn btn-outline-primary" type=submit value='{% if is_edit %}Edit{% else %}Add{% endif %} Publication'>
                 <a class="btn btn-outline-primary" href="{% url 'publications' 1 %}">Back to publications</a>
             </form>
