@@ -3,6 +3,7 @@ input, textarea, select{
   width: 100%;
   max-width: 700px;
   border: 1px solid black !important;
+  border-radius: 0px !important;
 }
 
 input[type='submit']{

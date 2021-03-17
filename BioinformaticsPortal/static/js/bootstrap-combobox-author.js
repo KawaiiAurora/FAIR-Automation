@@ -32,7 +32,6 @@
     this.$container = this.setup();
     this.$element = this.$container.find('input[type=text]');
     this.$target = this.$container.find('input[type=hidden]');
-    this.$button = this.$container.find('.dropdown-toggle');
     this.$menu = $(this.options.menu).appendTo('body');
     this.matcher = this.options.matcher || this.matcher;
     this.sorter = this.options.sorter || this.sorter;
@@ -59,14 +58,12 @@
 
   , disable: function() {
       this.$element.prop('disabled', true);
-      this.$button.attr('disabled', true);
       this.disabled = true;
       this.$container.addClass('combobox-disabled');
     }
 
   , enable: function() {
       this.$element.prop('disabled', false);
-      this.$button.attr('disabled', false);
       this.disabled = false;
       this.$container.removeClass('combobox-disabled');
     }
@@ -186,13 +183,8 @@
       } else if (this.options.bsVersion == '3') {
         return '<div class="combobox-container"> <input type="hidden" /> <div class="input-group"> <input type="text" autocomplete="off" /> <span class="input-group-addon dropdown-toggle" data-dropdown="dropdown"> <span class="caret pulldown" /> <span class="glyphicon glyphicon-remove remove" /> </span> </div> </div>'
       } else {
-        return '<div class="combobox-container"> <input type="hidden" /> <div class="input-group"> <input type="text" autocomplete="off" />'
-          + '<span class="input-group-append"' + (hasPopper ? ' data-toggle="dropdown" data-reference="parent"' : '') + '>'
-            + '<span class="input-group-text dropdown-toggle' + (this.options.iconCaret ? ' custom-icon' : '') + '">'
-              + (this.options.iconCaret ? '<span class="' + this.options.iconCaret + ' pulldown" />' : '')
-              + (this.options.iconRemove ? '<span class="' + this.options.iconRemove + ' remove" />' : '<span class="utf-remove remove" />')
-            + '</span>'
-          + '</span> </div> </div>';
+        return '<div class="combobox-container"> <input type="hidden" /> <div class="input-group"> <input id="existing_author_input" type="text" autocomplete="off" />'
+          + '</div> </div>';
       }
     }
 
@@ -317,9 +309,6 @@
         .on('click', $.proxy(this.click, this))
         .on('mouseenter', 'li', $.proxy(this.mouseenter, this))
         .on('mouseleave', 'li', $.proxy(this.mouseleave, this));
-
-      this.$button
-        .on('click', $.proxy(this.toggle, this));
     }
 
   , eventSupported: function(eventName) {

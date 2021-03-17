@@ -23,6 +23,7 @@ function addExistingAuthor(){
 	$(`#id_form-${form_idx}-surname`)[0].value = select_content.surname;
 	$(`#id_form-${form_idx}-email`)[0].value = select_content.email;
 	$('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    $('#existing_author_input').val('')
 }
 
 function removeAuthor(val){
