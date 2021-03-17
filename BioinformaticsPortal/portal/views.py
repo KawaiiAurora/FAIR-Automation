@@ -30,7 +30,7 @@ def index(request):
     })
 
 
-def publications(request, current_page):
+def publications(request, current_page, show_hidden=False):
     def create_ieee_citation(publication):
         authors = list(publication.authors.all())
         author_string = ""
@@ -67,7 +67,11 @@ def publications(request, current_page):
                             "citation": create_ieee_citation(pub),
                             "pub": pub,
                             "authors": full_authors(pub),
-                        }, Publication.objects.all()))
+                        },
+                        Publication.objects
+                        .filter(hidden=True) if show_hidden else Publication.objects.filter(hidden=False)
+                        )
+                    )
     paginator = Paginator(all_pubs, request.GET.get('pubs_per_page') or 10)
 
     if current_page not in paginator.page_range:
@@ -76,10 +80,16 @@ def publications(request, current_page):
     page_obj = paginator.get_page(current_page)
 
     return render(request, 'portal/publications.html', {'publications': page_obj,
+                                                        'show_hidden': show_hidden,
+                                                        'url_name': 'hidden_publications' if show_hidden else 'publications',
                                                         'last_page': current_page == paginator.page_range[-1],
                                                         'shown_pages': det_shown_page_range(paginator.page_range, 4),
                                                         'current_page': current_page,
                                                         'pubs_per_page': paginator.per_page})
+
+
+def hidden_publications(request, current_page):
+    return publications(request, current_page, True)
 
 
 def add_publication(request, is_edit=False, pub_obj=None):
@@ -96,7 +106,6 @@ def add_publication(request, is_edit=False, pub_obj=None):
 
     def look_for_corresponding(formset):
         result = False
-        print("Corresponding Result: " + str(result))
         for author_form in author_form_set:
             if author_form.cleaned_data['corresponding']:
                 result = True
@@ -105,7 +114,7 @@ def add_publication(request, is_edit=False, pub_obj=None):
 
     def author_form_validation(formset):
         is_valid = author_form_set.is_valid() and len(author_form_set) > 0
-        print("Basic isValid: "+str(is_valid))
+        print("Basic isValid: " + str(is_valid))
         corresponding_author_check = False
         if is_valid:
             corresponding_author_check = look_for_corresponding(formset)
@@ -154,20 +163,30 @@ def add_publication(request, is_edit=False, pub_obj=None):
                 new_pub.save()
             for author_form in author_form_set:
                 if author_form.is_valid():
-                    name = author_form.cleaned_data['name']
-                    surname = author_form.cleaned_data['surname']
-                    email = author_form.cleaned_data['email']
-                    corresponding = author_form.cleaned_data['corresponding']
-                    # look up existing author
-                    author = PublicationAuthor.objects.filter(email=email).first()
-                    if author is None:
-                        author = PublicationAuthor(name=name, surname=surname, email=email)
-                        author.save()
-
+                    # identifying publication to associate
                     assoc_pub = pub_obj if is_edit else new_pub
-                    PublicationAssociatedAuthor.objects.create(publication=assoc_pub,
-                                                               author=author,
-                                                               correspondingAuthor=corresponding)
+                    # look up existing author
+                    author_to_use = None
+                    existing_author = PublicationAuthor.objects.filter(email=author_form.cleaned_data['email']).first()
+                    already_associated = False
+                    if existing_author is None:
+                        author_to_use = PublicationAuthor(name=author_form.cleaned_data['name'],
+                                                          surname=author_form.cleaned_data['surname'],
+                                                          email=author_form.cleaned_data['email'])
+                        author_to_use.save()
+                    else:
+                        # If the author already exists, check if the author is already assocaited with publication
+                        author_to_use = existing_author
+                        if PublicationAssociatedAuthor.objects.filter(publication=assoc_pub, author=author_to_use). \
+                                first() is not None:
+                            already_associated = True
+
+                    # Only add association if the author is not already associated with publication
+                    if not already_associated:
+                        PublicationAssociatedAuthor.objects.create(publication=assoc_pub,
+                                                                   author=author_to_use,
+                                                                   correspondingAuthor=author_form.cleaned_data[
+                                                                       'corresponding'])
 
             return HttpResponseRedirect('/portal/publications/1')
         else:

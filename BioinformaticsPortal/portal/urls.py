@@ -7,6 +7,7 @@ urlpatterns = [
     path('', lambda req: redirect('/portal/home/')),
     path('portal/home/', views.index, name="home"),
     path('portal/publications/<int:current_page>', views.publications, name="publications"),
+    path('portal/hidden_publications/<int:current_page>', views.hidden_publications, name="hidden_publications"),
     path('portal/publications/add', views.add_publication, name="add_publication"),
     path('portal/publications/edit/<int:pub_id>', views.edit_publication, name="edit_publication"),
     path('portal/publications/author_suggestions/', views.author_suggestions, name="author_suggestions"),

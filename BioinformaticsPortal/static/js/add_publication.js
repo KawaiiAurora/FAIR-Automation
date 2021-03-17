@@ -36,11 +36,11 @@ function removeAuthor(val){
     author_forms = Object.values(author_forms).slice(0,author_forms.length-2); //getting only relevant values
     for(let x = 0; x < author_forms.length; x++){
         author_forms[x].id = `author_form_${x}`;
-        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/<span>Author \d+<\/span>/,`<span>Author ${x+1}</span>`)
-        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/data-target="#author_dropdown_\d+/gm,`data-target="#author_dropdown_${x}`)
-        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/onclick="toggleAuthorForm\('author_dropdown_icon_\d+/gm,`onclick="toggleAuthorForm('author_dropdown_icon_${x}`)
-        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/id="author_dropdown_icon_\d+/gm,`id="author_dropdown_icon_${x}`)
-        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/id="author_dropdown_\d+/gm,`id="author_dropdown_${x}`)
+        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/<span>Author \d+/gm,`<span>Author ${x+1}`);
+        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/data-target="#author_dropdown_\d+/gm,`data-target="#author_dropdown_${x}`);
+        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/onclick="toggleAuthorForm\('author_dropdown_icon_\d+/gm,`onclick="toggleAuthorForm('author_dropdown_icon_${x}`);
+        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/id="author_dropdown_icon_\d+/gm,`id="author_dropdown_icon_${x}`);
+        author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/id="author_dropdown_\d+/gm,`id="author_dropdown_${x}`);
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/removeAuthor\(\d+/gm,`removeAuthor(${x}`);
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/for="id_form-\d+/gm,`for="id_form-${x}`);
         author_forms[x].innerHTML = author_forms[x].innerHTML.replace(/id="id_form-\d+/gm,`id="id_form-${x}`);

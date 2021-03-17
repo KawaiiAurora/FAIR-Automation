@@ -63,7 +63,7 @@
                                             onclick="toggleAuthorForm('author_dropdown_icon_{{ forloop.counter0 }}')">
                                         <i id="author_dropdown_icon_{{ forloop.counter0 }}" class="typcn typcn-arrow-sorted-down"></i>
                                     </button>
-                                    <span>Author {{ forloop.counter }} {% if author_form.errors|length > 0 %} <span class="error-notification">(Has Errors)</span> {% endif %}</span>
+                                    <span>Author {{ forloop.counter }}{% if author_form.errors|length > 0 %}<span class="error-notification">(Has Errors)</span>{% endif %}</span>
                                 </div>
                                 <div class="collapse" id="author_dropdown_{{ forloop.counter0 }}" expanded="false" aria-expanded="false">
                                     <button onclick="removeAuthor({{ forloop.counter0 }})" class="btn btn-outline-primary mb-0" type="button">Remove Author</button>

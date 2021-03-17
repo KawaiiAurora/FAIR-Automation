@@ -19,7 +19,12 @@
 	<div class="d-flex flex-column">
 		<h3>Publications</h3>
 		{% if not user.is_authenticated %}
-			<a class="align-self-end" href="{% url 'add_publication' %}">Add publication</a>
+            <a class="align-self-end" href="{% url 'add_publication' %}">Add publication</a>
+            {%  if show_hidden %}
+                <a class="align-self-end" href="{% url 'publications' 1 %}">Back to visible publications</a>
+                {% else %}
+                <a class="align-self-end" href="{% url 'hidden_publications' 1 %}">View hidden publications</a>
+            {% endif %}
 		{% endif %}
 	</div>
 
@@ -64,26 +69,26 @@
         <ul class="pagination">
             {% if current_page > 1 %}
                 <li class="page-item">
-                    <a class="page-link" href="{% url 'publications' current_page|add:"-1" %}?pubs_per_page={{ pubs_per_page }}">Previous</a>
+                    <a class="page-link" href="{% url url_name current_page|add:"-1" %}?pubs_per_page={{ pubs_per_page }}">Previous</a>
                 </li>
             {% endif %}
             {% for pageNo in shown_pages %}
                 <li class="page-item {% if current_page == pageNo %} active {% endif %}">
-                    <a class="page-link" href="{% url 'publications' pageNo %}?pubs_per_page={{ pubs_per_page }}">{{pageNo}}</a>
+                    <a class="page-link" href="{% url url_name pageNo %}?pubs_per_page={{ pubs_per_page }}">{{pageNo}}</a>
                 </li>
             {% endfor %}
             {% if not last_page %}
-                <li class="page-item"><a class="page-link" href="{% url 'publications' current_page|add:"1" %}?pubs_per_page={{ pubs_per_page }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="{% url url_name current_page|add:"1" %}?pubs_per_page={{ pubs_per_page }}">Next</a></li>
             {% endif %}
             <p class="pagination_text ml-2 mb-0 p-0 d-inline">Publications per page: </p>
-            <select onchange="updatePagination('{% url 'publications' current_page %}',this)" class="ml-2 custom-select" style="width:auto">
+            <select onchange="updatePagination('{% url url_name current_page %}',this)" class="ml-2 custom-select" style="width:auto">
               <option {% if pubs_per_page == 10 %} selected {% endif %} value="10">10</option>
               <option {% if pubs_per_page == 20 %} selected {% endif %} value="20">20</option>
               <option {% if pubs_per_page == 50 %} selected {% endif %} value="50">50</option>
             </select>
         </ul>
-
     </nav>
+
 
 	</div>
 </div>
