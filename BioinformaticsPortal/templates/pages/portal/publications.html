@@ -47,7 +47,13 @@
                                 Author(s):
                                 <ul>
                                     {% for author in publication.authors %}
-                                        <li> {% if author.corresponding %} (Corresponding) <a href="mailto:{{author.email}}">{{ author.name }}</a> {% else %} {{ author.name }} {% endif %}  </li>
+                                        <li>
+                                        {% if author.corresponding %}
+                                            (Corresponding) <a href="mailto:{{author.email}}">{{ author.name }} {{ author.surname }}</a>
+                                        {% else %}
+                                            {{ author.name }} {{ author.surname }}
+                                        {% endif %}
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -55,8 +61,13 @@
                                 Year: {{ publication.pub.year }}
                             <p>
                             <p class="m-0 pt-2">
+                                {% if publication.pub.journal not in "" or None %}
                                 Journal: {{ publication.pub.journal }}
+                                {% else %}
+                                Conference: {{ publication.pub.conference }}
+                                {% endif %}
                             </p>
+
                             <a class="btn btn-outline-primary mt-2" href="{% url 'edit_publication' publication.pub.id %}">Edit Publication</a>
                         </p>
                     </div>

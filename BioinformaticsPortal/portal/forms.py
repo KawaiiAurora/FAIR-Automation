@@ -14,8 +14,11 @@ class PublicationForm(forms.Form):
         choices=[('journal', 'Journal Entry'), ('conference', 'Conference Paper')],
         label="Type of Publication")
     typeName = forms.CharField(max_length=1000, label_suffix='', label='Journal Name')
-    year = forms.IntegerField(label="Year of Publication", widget=forms.TextInput, min_value=1000,
-                              max_value=datetime.datetime.now().year, required="true", label_suffix='')
+    year = forms.IntegerField(label="Year of Publication (YYYY)",
+                              widget=forms.TextInput(attrs={'pattern': '^(?:19|20)\d{2}$',
+                                                            'title': '4 number date between 1900 and 2099'}),
+                              min_value=1900,
+                              max_value=2099, required="true", label_suffix='')
     abstract = forms.CharField(widget=forms.Textarea, required="true", label_suffix='')
     hidden = forms.BooleanField(initial=False, label="Should the publication be hidden?", required=False,
                                 label_suffix='')

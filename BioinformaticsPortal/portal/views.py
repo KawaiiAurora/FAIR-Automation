@@ -35,11 +35,16 @@ def publications(request, current_page, show_hidden=False):
         authors = list(publication.authors.all())
         author_string = ""
         for author in authors:
-            print(author.surname)
+            # abbreviating first names
+            author_name_str = ""
+            for author_name in author.name.split(' '):
+                author_name_str += author_name[0]+". "
+
+            # adding authors to string
             if authors.index(author) == len(authors) - 1 and len(authors) != 1:
-                author_string += f' and {author.name} {author.surname},'
-            else:
-                author_string += f' {author.name} {author.surname},'
+                author_string += ' and'
+
+            author_string += f' {author_name_str} {author.surname},'
 
         if publication.journal is not None:
             return f'{author_string} "<a href={publication.url}>{publication.title},</a>" <em>{publication.journal}</em>, {publication.year}.'
